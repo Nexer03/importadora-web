@@ -155,10 +155,6 @@ async function main() {
       value: "Importadora",
     },
     {
-      key: "free_shipping_min_amount",
-      value: "1000",
-    },
-    {
       key: "national_shipping_cost",
       value: "129",
     },
@@ -168,7 +164,7 @@ async function main() {
     },
     {
       key: "announcement_bar",
-      value: "Envio gratis a partir de $1000",
+      value: "",
     },
   ];
 
@@ -179,6 +175,12 @@ async function main() {
       create: setting,
     });
   }
+
+  await prisma.storeSetting.deleteMany({
+    where: {
+      key: "free_shipping_min_amount",
+    },
+  });
 
   await prisma.homeSection.upsert({
     where: {
