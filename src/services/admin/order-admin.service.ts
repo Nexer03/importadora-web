@@ -3,6 +3,7 @@ import { InvoiceStatus, OrderStatus } from "@prisma/client";
 import {
   getAdminOrderById,
   getAdminOrders,
+  getOrderMetrics,
   updateOrderInvoiceStatus,
   updateOrderNotes,
   updateOrderShipping,
@@ -171,6 +172,18 @@ export async function getAdminOrdersList() {
   await requireAdminAccess();
   const orders = await getAdminOrders();
   return orders.map(mapListItem);
+}
+
+export async function getAdminOrderDashboard() {
+  await requireAdminAccess();
+  const [metrics, orders] = await Promise.all([
+    getOrderMetrics(),
+    getAdminOrders(),
+  ]);
+  return {
+    metrics,
+    recentOrders: orders.slice(0, 5).map(mapListItem),
+  };
 }
 
 export async function getAdminOrderDetail(id: string) {

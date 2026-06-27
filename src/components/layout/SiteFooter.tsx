@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { legalNavLinks } from "@/content/legal";
+
 type SiteFooterProps = {
   settings?: Record<string, string>;
 };
@@ -37,14 +39,23 @@ export function SiteFooter({ settings = {} }: SiteFooterProps) {
         </div>
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-zinc-400">
-            Soporte
+            Informacion
           </p>
-          <div className="mt-4 flex flex-col gap-3 text-sm text-zinc-300">
-            <span>Envio nacional</span>
-            <span>Entrega local</span>
-            <span>Facturacion disponible</span>
+          <div className="mt-4 flex flex-col gap-3 text-sm">
+            {legalNavLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-zinc-300 hover:text-white"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
         </div>
+      </div>
+      <div className="border-t border-zinc-800 px-4 py-5 text-center text-xs text-zinc-500 sm:px-6 lg:px-8">
+        © {new Date().getFullYear()} {storeName}. Todos los derechos reservados.
       </div>
     </footer>
   );

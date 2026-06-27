@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 
+import { legalNavLinks } from "@/content/legal";
 import { getActiveCategories } from "@/repositories/category.repository";
 import { getActiveCollections } from "@/repositories/collection.repository";
 import { getSitemapProducts } from "@/repositories/product.repository";
@@ -52,6 +53,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: product.updatedAt,
       changeFrequency: "weekly" as const,
       priority: 0.8,
+    })),
+    ...legalNavLinks.map((link) => ({
+      url: `${siteUrl}${link.href}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.4,
     })),
   ];
 }
