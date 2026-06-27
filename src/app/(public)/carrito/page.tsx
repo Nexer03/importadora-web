@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { CartCouponForm } from "@/components/cart/CartCouponForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { getCart } from "@/services/cart.service";
 import { formatMXN } from "@/utils/format";
@@ -144,14 +145,28 @@ export default async function CartPage() {
                 {formatMXN(cart.subtotal)}
               </span>
             </div>
+            {cart.coupon && cart.coupon.discountAmount > 0 ? (
+              <div className="mt-2 flex items-center justify-between text-sm text-emerald-700">
+                <span>Descuento ({cart.coupon.code})</span>
+                <span className="font-semibold">
+                  -{formatMXN(cart.coupon.discountAmount)}
+                </span>
+              </div>
+            ) : null}
             <div className="mt-2 flex items-center justify-between text-sm text-zinc-600">
               <span>Envio</span>
-              <span>Se calcula en el checkout</span>
+              <span>
+                {cart.coupon?.freeShipping
+                  ? "Gratis con cupon"
+                  : "Se calcula en el checkout"}
+              </span>
             </div>
             <div className="mt-4 flex items-center justify-between border-t border-zinc-200 pt-4 text-base font-black text-zinc-950">
               <span>Subtotal</span>
-              <span>{formatMXN(cart.subtotal)}</span>
+              <span>{formatMXN(cart.total)}</span>
             </div>
+
+            <CartCouponForm coupon={cart.coupon} />
             <Link
               href="/checkout"
               className="mt-5 flex h-12 w-full items-center justify-center rounded-md bg-zinc-950 px-5 text-sm font-bold text-white"

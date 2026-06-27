@@ -16,6 +16,9 @@ type CheckoutFormProps = {
   shippingOptions: ShippingOption[];
   subtotal: number;
   paymentMethods: PaymentMethodOption[];
+  discountAmount: number;
+  couponCode: string | null;
+  freeShipping: boolean;
 };
 
 const inputClass =
@@ -27,6 +30,9 @@ export function CheckoutForm({
   shippingOptions,
   subtotal,
   paymentMethods,
+  discountAmount,
+  couponCode,
+  freeShipping,
 }: CheckoutFormProps) {
   const [state, formAction, pending] = useActionState(
     submitCheckoutAction,
@@ -44,8 +50,8 @@ export function CheckoutForm({
     () => shippingOptions.find((option) => option.method === method) ?? null,
     [shippingOptions, method]
   );
-  const shippingCost = selectedOption?.cost ?? 0;
-  const total = subtotal + shippingCost;
+  const shippingCost = freeShipping ? 0 : selectedOption?.cost ?? 0;
+  const total = subtotal - discountAmount + shippingCost;
   const needsAddress = method !== "LOCAL_PICKUP";
 
   return (
@@ -260,10 +266,20 @@ export function CheckoutForm({
           <span>Subtotal</span>
           <span className="font-semibold text-zinc-950">{formatMXN(subtotal)}</span>
         </div>
+        {discountAmount > 0 ? (
+          <div className="mt-2 flex items-center justify-between text-sm text-emerald-700">
+            <span>Descuento{couponCode ? ` (${couponCode})` : ""}</span>
+            <span className="font-semibold">-{formatMXN(discountAmount)}</span>
+          </div>
+        ) : null}
         <div className="mt-2 flex items-center justify-between text-sm text-zinc-600">
           <span>Envio</span>
           <span className="font-semibold text-zinc-950">
-            {shippingCost > 0 ? formatMXN(shippingCost) : "Gratis"}
+            {shippingCost > 0
+              ? formatMXN(shippingCost)
+              : freeShipping
+                ? "Gratis con cupon"
+                : "Gratis"}
           </span>
         </div>
         <div className="mt-4 flex items-center justify-between border-t border-zinc-200 pt-4 text-base font-black text-zinc-950">

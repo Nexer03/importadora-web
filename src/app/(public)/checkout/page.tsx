@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { getCheckoutCart } from "@/services/cart.service";
+import { tryApplyCoupon } from "@/services/coupon.service";
 import { getAvailablePaymentMethods } from "@/services/payments/registry";
 import { getShippingOptions } from "@/services/shipping.service";
 import { formatMXN } from "@/utils/format";
@@ -26,6 +27,9 @@ export default async function CheckoutPage() {
 
   const shippingOptions = await getShippingOptions(checkoutCart.subtotal);
   const paymentMethods = getAvailablePaymentMethods();
+  const appliedCoupon = checkoutCart.couponCode
+    ? await tryApplyCoupon(checkoutCart.couponCode, checkoutCart.subtotal)
+    : null;
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -59,6 +63,9 @@ export default async function CheckoutPage() {
           shippingOptions={shippingOptions}
           subtotal={checkoutCart.subtotal}
           paymentMethods={paymentMethods}
+          discountAmount={appliedCoupon?.discountAmount ?? 0}
+          couponCode={appliedCoupon?.code ?? null}
+          freeShipping={appliedCoupon?.freeShipping ?? false}
         />
       </div>
     </div>

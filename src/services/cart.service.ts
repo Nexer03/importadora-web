@@ -11,10 +11,12 @@ import {
   getActiveCartBySession,
   getCartItem,
   getCartItemByVariant,
+  setCartCoupon,
   touchCart,
   updateCartItemQuantity,
   type CartWithItems,
 } from "@/repositories/cart.repository";
+import { tryApplyCoupon, validateCoupon } from "@/services/coupon.service";
 import type { CartDTO, CartItemDTO } from "@/types/cart";
 import {
   addToCartSchema,
@@ -36,6 +38,8 @@ const EMPTY_CART: CartDTO = {
   items: [],
   itemCount: 0,
   subtotal: 0,
+  total: 0,
+  coupon: null,
   isEmpty: true,
 };
 
@@ -86,16 +90,31 @@ function toCartItemDTO(item: CartWithItems["items"][number]): CartItemDTO {
   };
 }
 
-function toCartDTO(cart: CartWithItems): CartDTO {
+async function toCartDTO(cart: CartWithItems): Promise<CartDTO> {
   const items = cart.items.map(toCartItemDTO);
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.lineTotal, 0);
+
+  const applied = cart.couponCode
+    ? await tryApplyCoupon(cart.couponCode, subtotal)
+    : null;
+  const coupon = applied
+    ? {
+        code: applied.code,
+        discountType: applied.discountType,
+        discountAmount: applied.discountAmount,
+        freeShipping: applied.freeShipping,
+      }
+    : null;
+  const total = subtotal - (coupon?.discountAmount ?? 0);
 
   return {
     id: cart.id,
     items,
     itemCount,
     subtotal,
+    total,
+    coupon,
     isEmpty: items.length === 0,
   };
 }
@@ -168,6 +187,40 @@ export async function getCart(): Promise<CartDTO> {
   return cart ? toCartDTO(cart) : EMPTY_CART;
 }
 
+export async function applyCartCoupon(rawCode: string): Promise<CartDTO> {
+  const sessionId = await readCartSessionId();
+  if (!sessionId) {
+    throw new CartError("Tu carrito esta vacio.");
+  }
+  const cart = await getActiveCartBySession(sessionId);
+  if (!cart || cart.items.length === 0) {
+    throw new CartError("Tu carrito esta vacio.");
+  }
+
+  const subtotal = cart.items.reduce(
+    (total, item) =>
+      total + getEffectiveUnitPrice(item) * item.quantity,
+    0
+  );
+
+  // Lanza CouponError si el cupon no es valido para este subtotal.
+  const applied = await validateCoupon(rawCode, subtotal);
+  await setCartCoupon(cart.id, applied.code);
+  return getCart();
+}
+
+export async function removeCartCoupon(): Promise<CartDTO> {
+  const sessionId = await readCartSessionId();
+  if (!sessionId) {
+    return EMPTY_CART;
+  }
+  const cart = await getActiveCartBySession(sessionId);
+  if (cart) {
+    await setCartCoupon(cart.id, null);
+  }
+  return getCart();
+}
+
 export async function getCartItemCount(): Promise<number> {
   const cart = await getCart();
   return cart.itemCount;
@@ -184,6 +237,7 @@ export async function getCheckoutCart(): Promise<{
   userId: string | null;
   items: CartItemDTO[];
   subtotal: number;
+  couponCode: string | null;
 } | null> {
   const sessionId = await readCartSessionId();
   if (!sessionId) {
@@ -195,7 +249,7 @@ export async function getCheckoutCart(): Promise<{
     return null;
   }
 
-  const dto = toCartDTO(cart);
+  const dto = await toCartDTO(cart);
   const userId = await getSessionUserId();
 
   return {
@@ -204,6 +258,7 @@ export async function getCheckoutCart(): Promise<{
     userId,
     items: dto.items,
     subtotal: dto.subtotal,
+    couponCode: cart.couponCode,
   };
 }
 

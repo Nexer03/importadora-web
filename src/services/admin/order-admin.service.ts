@@ -80,6 +80,8 @@ export type AdminOrderDetailDTO = {
   fiscalCfdiUse: string | null;
   fiscalEmail: string | null;
   subtotal: number;
+  discountAmount: number;
+  couponCode: string | null;
   shippingCost: number;
   total: number;
   notes: string | null;
@@ -136,6 +138,8 @@ function mapDetail(order: AdminOrderWithRelations): AdminOrderDetailDTO {
     fiscalCfdiUse: order.fiscalCfdiUse,
     fiscalEmail: order.fiscalEmail,
     subtotal: decimalToNumber(order.subtotal),
+    discountAmount: decimalToNumber(order.discountAmount),
+    couponCode: order.couponCode,
     shippingCost: decimalToNumber(order.shippingCost),
     total: decimalToNumber(order.total),
     notes: order.notes,

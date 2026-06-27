@@ -5,10 +5,13 @@ import { redirect } from "next/navigation";
 
 import {
   addToCart,
+  applyCartCoupon,
   CartError,
+  removeCartCoupon,
   removeCartItem,
   updateCartItem,
 } from "@/services/cart.service";
+import { CouponError } from "@/services/coupon.service";
 
 export type CartActionState = {
   ok: boolean;
@@ -54,6 +57,37 @@ export async function buyNowAction(formData: FormData): Promise<void> {
   });
   revalidateCart();
   redirect("/carrito");
+}
+
+export type CouponActionState = {
+  ok: boolean;
+  error?: string;
+};
+
+export async function applyCouponAction(
+  _prevState: CouponActionState,
+  formData: FormData
+): Promise<CouponActionState> {
+  const code = formData.get("code");
+  try {
+    await applyCartCoupon(typeof code === "string" ? code : "");
+    revalidateCart();
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof CouponError || error instanceof CartError) {
+      return { ok: false, error: error.message };
+    }
+    return { ok: false, error: "No se pudo aplicar el cupon." };
+  }
+}
+
+export async function removeCouponAction(): Promise<void> {
+  try {
+    await removeCartCoupon();
+  } catch {
+    // sin efecto si no habia cupon
+  }
+  revalidateCart();
 }
 
 export async function updateCartItemAction(formData: FormData): Promise<void> {

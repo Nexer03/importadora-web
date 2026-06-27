@@ -59,8 +59,10 @@ export type CreatePendingOrderInput = {
     cfdiUse: string | null;
     email: string | null;
   };
+  couponCode: string | null;
   amounts: {
     subtotal: number;
+    discountAmount: number;
     shippingCost: number;
     total: number;
   };
@@ -134,6 +136,8 @@ export function createPendingOrder(
         fiscalCfdiUse: input.invoice.cfdiUse,
         fiscalEmail: input.invoice.email,
         subtotal: new Prisma.Decimal(input.amounts.subtotal),
+        discountAmount: new Prisma.Decimal(input.amounts.discountAmount),
+        couponCode: input.couponCode,
         shippingCost: new Prisma.Decimal(input.amounts.shippingCost),
         total: new Prisma.Decimal(input.amounts.total),
         items: {
@@ -245,6 +249,21 @@ export function markOrderPaid(orderId: string, payment: PaymentRecord) {
       where: { orderId: order.id, status: StockReservationStatus.ACTIVE },
       data: { status: StockReservationStatus.CONVERTED },
     });
+
+    if (order.couponCode) {
+      const coupon = await tx.coupon.findUnique({
+        where: { code: order.couponCode },
+      });
+      if (coupon) {
+        await tx.coupon.update({
+          where: { id: coupon.id },
+          data: { usesCount: { increment: 1 } },
+        });
+        await tx.couponRedemption.create({
+          data: { couponId: coupon.id, orderId: order.id },
+        });
+      }
+    }
 
     await tx.paymentTransaction.create({
       data: {

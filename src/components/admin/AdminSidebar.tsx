@@ -7,6 +7,7 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorias" },
   { href: "/admin/publicos", label: "Publicos" },
   { href: "/admin/colecciones", label: "Colecciones" },
+  { href: "/admin/promociones", label: "Promociones" },
   { href: "/admin/home", label: "Home" },
   { href: "/admin/settings", label: "Settings" },
 ];

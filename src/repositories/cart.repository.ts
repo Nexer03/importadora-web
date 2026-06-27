@@ -112,3 +112,10 @@ export function touchCart(cartId: string) {
     data: { updatedAt: new Date() },
   });
 }
+
+export function setCartCoupon(cartId: string, couponCode: string | null) {
+  return prisma.cart.update({
+    where: { id: cartId },
+    data: { couponCode },
+  });
+}

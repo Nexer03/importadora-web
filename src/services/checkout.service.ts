@@ -10,6 +10,7 @@ import {
   type OrderWithItems,
 } from "@/repositories/order.repository";
 import { getCheckoutCart } from "@/services/cart.service";
+import { tryApplyCoupon } from "@/services/coupon.service";
 import {
   getPaymentProvider,
   getStoreCurrency,
@@ -84,6 +85,8 @@ export function toOrderDTO(order: OrderWithItems): OrderDTO {
     addressReference: order.addressReference,
     invoiceStatus: order.invoiceStatus,
     subtotal: toMoney(order.subtotal),
+    discountAmount: toMoney(order.discountAmount),
+    couponCode: order.couponCode,
     shippingCost: toMoney(order.shippingCost),
     total: toMoney(order.total),
     items: order.items.map((item) => ({
@@ -117,8 +120,23 @@ export async function createOrderFromCart(
   }
 
   const subtotal = checkoutCart.subtotal;
-  const shippingCost = await calculateShippingCost(data.deliveryMethod, subtotal);
-  const total = subtotal + shippingCost;
+
+  let discountAmount = 0;
+  let freeShipping = false;
+  let couponCode: string | null = null;
+  if (checkoutCart.couponCode) {
+    const applied = await tryApplyCoupon(checkoutCart.couponCode, subtotal);
+    if (applied) {
+      discountAmount = applied.discountAmount;
+      freeShipping = applied.freeShipping;
+      couponCode = applied.code;
+    }
+  }
+
+  const shippingCost = freeShipping
+    ? 0
+    : await calculateShippingCost(data.deliveryMethod, subtotal);
+  const total = subtotal - discountAmount + shippingCost;
 
   const orderNumber = await generateUniqueOrderNumber();
   const reservationExpiresAt = new Date(
@@ -181,7 +199,8 @@ export async function createOrderFromCart(
         cfdiUse: emptyToNull(data.fiscalCfdiUse),
         email: emptyToNull(data.fiscalEmail),
       },
-      amounts: { subtotal, shippingCost, total },
+      amounts: { subtotal, discountAmount, shippingCost, total },
+      couponCode,
       items: checkoutCart.items.map((item) => ({
         productId: item.productId,
         productVariantId: item.variantId,

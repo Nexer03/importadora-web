@@ -28,6 +28,8 @@ export type OrderDTO = {
   addressReference: string | null;
   invoiceStatus: string;
   subtotal: number;
+  discountAmount: number;
+  couponCode: string | null;
   shippingCost: number;
   total: number;
   items: OrderItemDTO[];

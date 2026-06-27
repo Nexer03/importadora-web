@@ -164,6 +164,12 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
             <span>Subtotal</span>
             <span>{formatMXN(order.subtotal)}</span>
           </div>
+          {order.discountAmount > 0 ? (
+            <div className="mt-1 flex items-center justify-between text-emerald-700">
+              <span>Descuento{order.couponCode ? ` (${order.couponCode})` : ""}</span>
+              <span>-{formatMXN(order.discountAmount)}</span>
+            </div>
+          ) : null}
           <div className="mt-1 flex items-center justify-between text-zinc-600">
             <span>Envio</span>
             <span>

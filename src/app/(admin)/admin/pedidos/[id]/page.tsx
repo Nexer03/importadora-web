@@ -112,6 +112,14 @@ export default async function AdminOrderDetailPage({
                 <span>Subtotal</span>
                 <span>{formatMXN(order.subtotal)}</span>
               </div>
+              {order.discountAmount > 0 ? (
+                <div className="flex justify-between text-emerald-700">
+                  <span>
+                    Descuento{order.couponCode ? ` (${order.couponCode})` : ""}
+                  </span>
+                  <span>-{formatMXN(order.discountAmount)}</span>
+                </div>
+              ) : null}
               <div className="flex justify-between text-zinc-600">
                 <span>Envio</span>
                 <span>{formatMXN(order.shippingCost)}</span>
