@@ -415,6 +415,9 @@ model Order {
   state            String?
   addressReference String? @db.Text
 
+  carrier        String?
+  trackingNumber String?
+
   invoiceStatus    InvoiceStatus @default(NOT_REQUESTED)
   fiscalRfc        String?
   fiscalName       String?
