@@ -27,6 +27,47 @@ enum StockReservationStatus {
   CANCELLED
 }
 
+enum CartStatus {
+  ACTIVE
+  CONVERTED
+  ABANDONED
+}
+
+enum DeliveryMethod {
+  NATIONAL_SHIPPING
+  LOCAL_DELIVERY
+  LOCAL_PICKUP
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PREPARING
+  READY_FOR_PICKUP
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  PAYMENT_FAILED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  REFUNDED
+  CHARGEBACK
+  IN_REVIEW
+}
+
+enum InvoiceStatus {
+  NOT_REQUESTED
+  REQUESTED
+  ISSUED
+  REJECTED
+}
+
 enum InventoryMovementType {
   INITIAL_STOCK
   MANUAL_ADJUSTMENT
@@ -61,6 +102,8 @@ model User {
 
   stockReservations  StockReservation[]
   inventoryMovements InventoryMovement[]
+  carts              Cart[]
+  orders             Order[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -234,6 +277,7 @@ model ProductVariant {
 
   stockReservations  StockReservation[]
   inventoryMovements InventoryMovement[]
+  cartItems          CartItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -310,6 +354,133 @@ model InventoryMovement {
   @@index([userId])
   @@index([type])
   @@map("inventory_movements")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?
+  sessionId String?
+  status    CartStatus @default(ACTIVE)
+
+  user  User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+  @@map("carts")
+}
+
+model CartItem {
+  id               String @id @default(cuid())
+  cartId           String
+  productVariantId String
+  quantity         Int    @default(1)
+
+  cart           Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productVariant ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productVariantId])
+  @@index([cartId])
+  @@index([productVariantId])
+  @@map("cart_items")
+}
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique
+  userId      String?
+  sessionId   String?
+
+  status        OrderStatus   @default(PENDING_PAYMENT)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  paymentProvider  String?
+  paymentReference String?
+
+  customerName  String
+  customerEmail String
+  customerPhone String
+
+  deliveryMethod   DeliveryMethod
+  shippingAddress  String? @db.Text
+  postalCode       String?
+  city             String?
+  state            String?
+  addressReference String? @db.Text
+
+  invoiceStatus    InvoiceStatus @default(NOT_REQUESTED)
+  fiscalRfc        String?
+  fiscalName       String?
+  fiscalPostalCode String?
+  fiscalRegime     String?
+  fiscalCfdiUse    String?
+  fiscalEmail      String?
+
+  subtotal     Decimal @db.Decimal(10, 2)
+  shippingCost Decimal @db.Decimal(10, 2)
+  total        Decimal @db.Decimal(10, 2)
+
+  notes String? @db.Text
+
+  user     User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items    OrderItem[]
+  payments PaymentTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@map("orders")
+}
+
+model OrderItem {
+  id               String @id @default(cuid())
+  orderId          String
+  productId        String
+  productVariantId String
+
+  productName String
+  sku         String
+  unitPrice   Decimal @db.Decimal(10, 2)
+  quantity    Int
+  lineTotal   Decimal @db.Decimal(10, 2)
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model PaymentTransaction {
+  id                String  @id @default(cuid())
+  orderId           String
+  provider          String
+  providerOrderId   String?
+  providerCaptureId String?
+  status            String
+  amount            Decimal @db.Decimal(10, 2)
+  currency          String
+  payerEmail        String?
+  rawResponse       String? @db.Text
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+  @@map("payment_transactions")
 }
 
 model HomeSection {

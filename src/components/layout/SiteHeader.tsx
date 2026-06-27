@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { getCartItemCount } from "@/services/cart.service";
+
 const navItems = [
   { href: "/", label: "Inicio" },
   { href: "/coleccion/novedades", label: "Novedades" },
@@ -10,7 +12,9 @@ const navItems = [
   { href: "/productos", label: "Productos" },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const itemCount = await getCartItemCount();
+
   return (
     <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8">
@@ -23,10 +27,10 @@ export function SiteHeader() {
           </Link>
           <Link
             href="/carrito"
-            aria-label="Carrito visual"
+            aria-label={`Carrito con ${itemCount} productos`}
             className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
           >
-            Carrito (0)
+            Carrito ({itemCount})
           </Link>
         </div>
         <nav

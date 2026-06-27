@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { AddToCartForm } from "@/components/cart/AddToCartForm";
 import { getProductDetail } from "@/services/catalog.service";
 import {
   buildProductMetadata,
@@ -129,20 +130,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
             ) : null}
           </div>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              className="h-12 rounded-md bg-zinc-950 px-5 text-sm font-bold text-white"
-            >
-              Agregar al carrito
-            </button>
-            <button
-              type="button"
-              className="h-12 rounded-md border border-zinc-300 px-5 text-sm font-bold text-zinc-950"
-            >
-              Comprar ahora
-            </button>
-          </div>
+          {product.variants.length > 0 ? (
+            <AddToCartForm variants={product.variants} />
+          ) : (
+            <p className="mt-8 text-sm font-semibold text-zinc-500">
+              Producto sin variantes disponibles para compra.
+            </p>
+          )}
 
           <div className="mt-8 rounded-lg border border-zinc-200 p-5">
             <p className="text-sm font-black uppercase tracking-wide text-zinc-950">
