@@ -195,6 +195,81 @@ export function getOrderByNumber(orderNumber: string) {
   });
 }
 
+/**
+ * Expira reservas de stock vencidas (expiresAt pasado) de ordenes que siguen
+ * pendientes de pago: libera el stock, marca las reservas EXPIRED y cancela la
+ * orden. Idempotente. Pensada para ejecutarse por un cron. Devuelve el numero
+ * de ordenes expiradas.
+ */
+export async function expireStaleReservations(
+  now: Date = new Date()
+): Promise<number> {
+  const expired = await prisma.stockReservation.findMany({
+    where: {
+      status: StockReservationStatus.ACTIVE,
+      expiresAt: { lt: now },
+      orderId: { not: null },
+    },
+  });
+
+  const byOrder = new Map<string, typeof expired>();
+  for (const reservation of expired) {
+    if (!reservation.orderId) {
+      continue;
+    }
+    const group = byOrder.get(reservation.orderId) ?? [];
+    group.push(reservation);
+    byOrder.set(reservation.orderId, group);
+  }
+
+  let expiredOrders = 0;
+
+  for (const [orderId, reservations] of byOrder) {
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    if (!order || order.status !== OrderStatus.PENDING_PAYMENT) {
+      continue;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      for (const reservation of reservations) {
+        await tx.productVariant.update({
+          where: { id: reservation.productVariantId },
+          data: {
+            stockAvailable: { increment: reservation.quantity },
+            stockReserved: { decrement: reservation.quantity },
+          },
+        });
+        await tx.inventoryMovement.create({
+          data: {
+            productVariantId: reservation.productVariantId,
+            userId: order.userId,
+            type: InventoryMovementType.RESERVATION_RELEASE,
+            quantity: reservation.quantity,
+            note: `Expiracion de reserva orden ${order.orderNumber}`,
+          },
+        });
+      }
+
+      await tx.stockReservation.updateMany({
+        where: { orderId: order.id, status: StockReservationStatus.ACTIVE },
+        data: { status: StockReservationStatus.EXPIRED },
+      });
+
+      await tx.order.update({
+        where: { id: order.id },
+        data: {
+          status: OrderStatus.CANCELLED,
+          paymentStatus: PaymentStatus.CANCELLED,
+        },
+      });
+    });
+
+    expiredOrders += 1;
+  }
+
+  return expiredOrders;
+}
+
 export function orderNumberExists(orderNumber: string) {
   return prisma.order.findUnique({
     where: { orderNumber },
