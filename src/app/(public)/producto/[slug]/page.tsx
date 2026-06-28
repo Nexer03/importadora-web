@@ -144,8 +144,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
             <p className="mt-3 text-sm leading-6 text-zinc-600">
               {product.stockAvailable > 0
-                ? `${product.stockAvailable} piezas visibles en inventario.`
-                : "Stock por confirmar antes de compra."}
+                ? `${product.stockAvailable} piezas disponibles.`
+                : "Producto agotado por ahora."}
             </p>
           </div>
 
@@ -185,8 +185,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </p>
             <div className="mt-3 grid gap-2 text-sm leading-6 text-zinc-600">
               <p>Entrega local disponible en zonas definidas por la tienda.</p>
-              <p>Envio nacional con costo calculado en una fase posterior.</p>
-              <p>Facturacion disponible bajo solicitud.</p>
+              <p>Envio nacional con costo calculado en el checkout.</p>
+              <p>Pago seguro en linea con PayPal o tarjeta.</p>
             </div>
           </div>
 

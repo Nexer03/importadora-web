@@ -137,26 +137,6 @@ export const legalDocs = {
       },
     ],
   },
-  facturacion: {
-    slug: "facturacion",
-    title: "Politica de facturacion",
-    description: "Como solicitar factura de tu compra.",
-    sections: [
-      {
-        heading: "Solicitud de factura",
-        body: [
-          "Puedes solicitar factura durante el checkout marcando la opcion correspondiente y capturando tus datos fiscales.",
-          "La factura se emite de forma manual por el equipo una vez confirmado el pago.",
-        ],
-      },
-      {
-        heading: "Datos requeridos",
-        body: [
-          "RFC, nombre o razon social, codigo postal fiscal, regimen fiscal, uso de CFDI y correo para envio de la factura.",
-        ],
-      },
-    ],
-  },
   contacto: {
     slug: "contacto",
     title: "Contacto",
@@ -197,12 +177,6 @@ export const legalDocs = {
         ],
       },
       {
-        heading: "Hacen factura?",
-        body: [
-          "Si. Solicitala en el checkout marcando la opcion de factura y capturando tus datos fiscales.",
-        ],
-      },
-      {
         heading: "Como uso un cupon?",
         body: [
           "En el carrito ingresa tu codigo de cupon en el campo correspondiente y presiona Aplicar.",
@@ -217,7 +191,6 @@ export type LegalSlug = keyof typeof legalDocs;
 export const legalNavLinks: Array<{ href: string; label: string }> = [
   { href: "/envios", label: "Politica de envios" },
   { href: "/cambios", label: "Politica de cambios" },
-  { href: "/facturacion", label: "Facturacion" },
   { href: "/terminos", label: "Terminos y condiciones" },
   { href: "/privacidad", label: "Aviso de privacidad" },
   { href: "/preguntas-frecuentes", label: "Preguntas frecuentes" },

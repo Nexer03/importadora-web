@@ -35,13 +35,6 @@ export async function submitCheckoutAction(
       city: formData.get("city") ?? "",
       state: formData.get("state") ?? "",
       addressReference: formData.get("addressReference") ?? "",
-      requiresInvoice: formData.get("requiresInvoice") === "on",
-      fiscalRfc: formData.get("fiscalRfc") ?? "",
-      fiscalName: formData.get("fiscalName") ?? "",
-      fiscalPostalCode: formData.get("fiscalPostalCode") ?? "",
-      fiscalRegime: formData.get("fiscalRegime") ?? "",
-      fiscalCfdiUse: formData.get("fiscalCfdiUse") ?? "",
-      fiscalEmail: formData.get("fiscalEmail") ?? "",
     });
     approveUrl = result.approveUrl;
   } catch (error) {

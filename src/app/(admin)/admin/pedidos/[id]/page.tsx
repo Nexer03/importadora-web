@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
-  updateOrderInvoiceAction,
   updateOrderNotesAction,
   updateOrderShippingAction,
   updateOrderStatusAction,
@@ -15,17 +14,13 @@ import { getAdminOrderDetail } from "@/services/admin/order-admin.service";
 import { formatMXN } from "@/utils/format";
 import {
   deliveryMethodLabels,
-  invoiceStatusLabels,
   labelFor,
   orderStatusLabels,
   orderStatusTone,
   paymentStatusLabels,
   paymentStatusTone,
 } from "@/utils/order-labels";
-import {
-  invoiceStatuses,
-  orderStatuses,
-} from "@/validators/admin/order.validator";
+import { orderStatuses } from "@/validators/admin/order.validator";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -164,37 +159,6 @@ export default async function AdminOrderDetailPage({
             </AdminCard>
           </div>
 
-          {order.invoiceStatus !== "NOT_REQUESTED" ? (
-            <AdminCard title="Datos fiscales">
-              <div className="grid gap-1 text-sm text-zinc-700 sm:grid-cols-2">
-                <p>
-                  <span className={labelClass}>RFC: </span>
-                  {order.fiscalRfc ?? "—"}
-                </p>
-                <p>
-                  <span className={labelClass}>Razon social: </span>
-                  {order.fiscalName ?? "—"}
-                </p>
-                <p>
-                  <span className={labelClass}>CP fiscal: </span>
-                  {order.fiscalPostalCode ?? "—"}
-                </p>
-                <p>
-                  <span className={labelClass}>Regimen: </span>
-                  {order.fiscalRegime ?? "—"}
-                </p>
-                <p>
-                  <span className={labelClass}>Uso CFDI: </span>
-                  {order.fiscalCfdiUse ?? "—"}
-                </p>
-                <p>
-                  <span className={labelClass}>Correo: </span>
-                  {order.fiscalEmail ?? "—"}
-                </p>
-              </div>
-            </AdminCard>
-          ) : null}
-
           <AdminCard title="Pagos" description="Transacciones registradas del pedido.">
             {order.payments.length === 0 ? (
               <p className="text-sm text-zinc-500">Sin transacciones registradas.</p>
@@ -287,35 +251,6 @@ export default async function AdminOrderDetailPage({
                 className="h-11 rounded-md bg-zinc-950 px-4 text-sm font-bold text-white"
               >
                 Guardar envio
-              </button>
-            </form>
-          </AdminCard>
-
-          <AdminCard title="Factura">
-            <p className="mb-3 text-sm text-zinc-600">
-              Estado actual:{" "}
-              <span className="font-semibold text-zinc-950">
-                {labelFor(invoiceStatusLabels, order.invoiceStatus)}
-              </span>
-            </p>
-            <form action={updateOrderInvoiceAction} className="grid gap-3">
-              <input type="hidden" name="id" value={order.id} />
-              <select
-                name="invoiceStatus"
-                defaultValue={order.invoiceStatus}
-                className={inputClass}
-              >
-                {invoiceStatuses.map((status) => (
-                  <option key={status} value={status}>
-                    {labelFor(invoiceStatusLabels, status)}
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                className="h-11 rounded-md border border-zinc-300 px-4 text-sm font-bold text-zinc-950"
-              >
-                Actualizar factura
               </button>
             </form>
           </AdminCard>

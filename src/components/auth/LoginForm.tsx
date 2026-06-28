@@ -59,7 +59,7 @@ export function LoginForm({
           required
           autoComplete="email"
           className="mt-2 h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 outline-none transition focus:border-zinc-950"
-          placeholder="admin@importadora.local"
+          placeholder="tu@correo.com"
         />
       </label>
 

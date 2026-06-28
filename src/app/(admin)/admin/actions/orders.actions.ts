@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
-  updateAdminOrderInvoiceStatus,
   updateAdminOrderNotes,
   updateAdminOrderShipping,
   updateAdminOrderStatus,
@@ -42,21 +41,6 @@ export async function updateOrderShippingAction(formData: FormData) {
 
   try {
     await updateAdminOrderShipping(id, formDataToRecord(formData));
-    revalidateOrder(id);
-    target = `/admin/pedidos/${id}?saved=1`;
-  } catch (error) {
-    target = errorRedirectPath(target, error);
-  }
-
-  redirect(target);
-}
-
-export async function updateOrderInvoiceAction(formData: FormData) {
-  const id = getRequiredFormValue(formData, "id");
-  let target = `/admin/pedidos/${id}`;
-
-  try {
-    await updateAdminOrderInvoiceStatus(id, formDataToRecord(formData));
     revalidateOrder(id);
     target = `/admin/pedidos/${id}?saved=1`;
   } catch (error) {

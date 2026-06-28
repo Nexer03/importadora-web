@@ -38,7 +38,6 @@ export default async function AdminDashboardPage() {
     { label: "Pagados", value: orderData.metrics.paid },
     { label: "Por preparar", value: orderData.metrics.preparing },
     { label: "Enviados", value: orderData.metrics.shipped },
-    { label: "Solicitudes de factura", value: orderData.metrics.invoiceRequests },
   ];
 
   const cards = [

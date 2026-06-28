@@ -1,10 +1,9 @@
-import { InvoiceStatus, OrderStatus } from "@prisma/client";
+import { OrderStatus } from "@prisma/client";
 
 import {
   getAdminOrderById,
   getAdminOrders,
   getOrderMetrics,
-  updateOrderInvoiceStatus,
   updateOrderNotes,
   updateOrderShipping,
   updateOrderStatus,
@@ -13,7 +12,6 @@ import {
 } from "@/repositories/admin/order-admin.repository";
 import { requireAdminAccess } from "@/services/admin.guard";
 import {
-  updateOrderInvoiceSchema,
   updateOrderNotesSchema,
   updateOrderShippingSchema,
   updateOrderStatusSchema,
@@ -206,12 +204,6 @@ export async function updateAdminOrderShipping(id: string, raw: unknown) {
     emptyToNull(data.carrier),
     emptyToNull(data.trackingNumber)
   );
-}
-
-export async function updateAdminOrderInvoiceStatus(id: string, raw: unknown) {
-  await requireAdminAccess();
-  const { invoiceStatus } = validateAdminInput(updateOrderInvoiceSchema, raw);
-  return updateOrderInvoiceStatus(id, invoiceStatus as InvoiceStatus);
 }
 
 export async function updateAdminOrderNotes(id: string, raw: unknown) {

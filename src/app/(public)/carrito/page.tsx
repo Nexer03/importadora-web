@@ -174,7 +174,8 @@ export default async function CartPage() {
               Continuar al checkout
             </Link>
             <p className="mt-2 text-center text-xs text-zinc-500">
-              El pago en linea se habilita en la siguiente fase.
+              Pago seguro con PayPal o tarjeta. El envio se calcula en el
+              checkout.
             </p>
             <Link
               href="/productos"

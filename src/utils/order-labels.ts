@@ -26,13 +26,6 @@ export const deliveryMethodLabels: Record<string, string> = {
   LOCAL_PICKUP: "Recoleccion local",
 };
 
-export const invoiceStatusLabels: Record<string, string> = {
-  NOT_REQUESTED: "No solicitada",
-  REQUESTED: "Solicitada",
-  ISSUED: "Emitida",
-  REJECTED: "Rechazada",
-};
-
 export function orderStatusTone(
   status: string
 ): "default" | "success" | "warning" | "muted" | "danger" {

@@ -27,13 +27,6 @@ export const checkoutSchema = z
     city: optionalText(100),
     state: optionalText(100),
     addressReference: optionalText(300),
-    requiresInvoice: z.boolean().default(false),
-    fiscalRfc: optionalText(13),
-    fiscalName: optionalText(200),
-    fiscalPostalCode: optionalText(10),
-    fiscalRegime: optionalText(100),
-    fiscalCfdiUse: optionalText(100),
-    fiscalEmail: z.string().trim().email("Correo fiscal invalido").max(160).optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
     if (data.deliveryMethod !== "LOCAL_PICKUP") {
@@ -44,21 +37,6 @@ export const checkoutSchema = z
         ["state", "Estado requerido"],
       ];
       for (const [field, message] of requiredAddress) {
-        if (!data[field]) {
-          ctx.addIssue({ code: "custom", path: [field], message });
-        }
-      }
-    }
-
-    if (data.requiresInvoice) {
-      const requiredFiscal: Array<[keyof typeof data, string]> = [
-        ["fiscalRfc", "RFC requerido"],
-        ["fiscalName", "Nombre o razon social requerido"],
-        ["fiscalPostalCode", "Codigo postal fiscal requerido"],
-        ["fiscalRegime", "Regimen fiscal requerido"],
-        ["fiscalCfdiUse", "Uso de CFDI requerido"],
-      ];
-      for (const [field, message] of requiredFiscal) {
         if (!data[field]) {
           ctx.addIssue({ code: "custom", path: [field], message });
         }

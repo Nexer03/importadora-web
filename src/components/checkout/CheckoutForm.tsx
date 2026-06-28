@@ -44,7 +44,6 @@ export function CheckoutForm({
   const [paymentProvider, setPaymentProvider] = useState(
     paymentMethods[0]?.provider ?? ""
   );
-  const [requiresInvoice, setRequiresInvoice] = useState(false);
 
   const selectedOption = useMemo(
     () => shippingOptions.find((option) => option.method === method) ?? null,
@@ -173,68 +172,6 @@ export function CheckoutForm({
             recoleccion despues de confirmar el pedido.
           </p>
         )}
-
-        <fieldset className="grid gap-4 rounded-lg border border-zinc-200 p-5">
-          <legend className="px-1 text-sm font-black uppercase tracking-wide text-zinc-950">
-            Facturacion
-          </legend>
-          <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-zinc-950">
-            <input
-              type="checkbox"
-              name="requiresInvoice"
-              checked={requiresInvoice}
-              onChange={(event) => setRequiresInvoice(event.target.checked)}
-            />
-            Requiero factura
-          </label>
-
-          {requiresInvoice ? (
-            <div className="grid gap-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass} htmlFor="fiscalRfc">
-                    RFC
-                  </label>
-                  <input id="fiscalRfc" name="fiscalRfc" className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="fiscalName">
-                    Nombre o razon social
-                  </label>
-                  <input id="fiscalName" name="fiscalName" className={inputClass} />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass} htmlFor="fiscalPostalCode">
-                    Codigo postal fiscal
-                  </label>
-                  <input id="fiscalPostalCode" name="fiscalPostalCode" className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="fiscalEmail">
-                    Correo para factura
-                  </label>
-                  <input id="fiscalEmail" name="fiscalEmail" type="email" className={inputClass} />
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className={labelClass} htmlFor="fiscalRegime">
-                    Regimen fiscal
-                  </label>
-                  <input id="fiscalRegime" name="fiscalRegime" className={inputClass} />
-                </div>
-                <div>
-                  <label className={labelClass} htmlFor="fiscalCfdiUse">
-                    Uso de CFDI
-                  </label>
-                  <input id="fiscalCfdiUse" name="fiscalCfdiUse" className={inputClass} />
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </fieldset>
 
         <fieldset className="grid gap-3 rounded-lg border border-zinc-200 p-5">
           <legend className="px-1 text-sm font-black uppercase tracking-wide text-zinc-950">

@@ -1,7 +1,7 @@
 const benefits = [
   {
     title: "Pago seguro",
-    description: "Preparado para integrar pagos en la siguiente fase.",
+    description: "Paga en linea con PayPal o tarjeta de forma segura.",
   },
   {
     title: "Envio nacional",
@@ -12,8 +12,8 @@ const benefits = [
     description: "Opciones practicas para clientes cercanos.",
   },
   {
-    title: "Facturacion disponible",
-    description: "Listo para flujos comerciales formales.",
+    title: "Compra protegida",
+    description: "Tu pedido se confirma solo despues de validar el pago.",
   },
 ];
 

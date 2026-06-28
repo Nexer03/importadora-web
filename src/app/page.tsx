@@ -58,11 +58,11 @@ export default async function HomePage() {
         <HomeProductSection
           eyebrow="Recien llegado"
           title="Novedades"
-          description="Productos publicados recientemente para mantener el catalogo fresco."
+          description="Lo mas reciente de nuestro catalogo."
           href="/coleccion/novedades"
           products={data.newProducts}
           emptyTitle="Novedades en camino"
-          emptyDescription="Cuando se publiquen productos nuevos apareceran aqui."
+          emptyDescription="Muy pronto agregaremos productos nuevos."
         />
         <PromoBanner
           title={banner?.title ?? undefined}
@@ -73,20 +73,20 @@ export default async function HomePage() {
         <HomeProductSection
           eyebrow="Precio especial"
           title="Descuentos"
-          description="Promociones visibles sin saturar la experiencia de compra."
+          description="Productos con precio especial por tiempo limitado."
           href="/productos?collection=descuentos"
           products={data.discountedProducts}
           emptyTitle="Sin descuentos activos"
-          emptyDescription="Los productos con precio especial se mostraran automaticamente."
+          emptyDescription="Por ahora no hay productos con descuento. Vuelve pronto."
         />
         <HomeProductSection
           eyebrow="Seleccion"
           title="Productos destacados"
-          description="Piezas priorizadas para la primera vista de la tienda."
+          description="Nuestra seleccion recomendada."
           href="/productos"
           products={data.featuredProducts}
-          emptyTitle="Destacados por definir"
-          emptyDescription="Marca productos como destacados para llenar esta seccion."
+          emptyTitle="Proximamente"
+          emptyDescription="Pronto destacaremos productos en esta seccion."
         />
         <HomeBenefits />
       </main>

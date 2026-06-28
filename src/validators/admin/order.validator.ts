@@ -12,13 +12,6 @@ export const orderStatuses = [
   "REFUNDED",
 ] as const;
 
-export const invoiceStatuses = [
-  "NOT_REQUESTED",
-  "REQUESTED",
-  "ISSUED",
-  "REJECTED",
-] as const;
-
 export const updateOrderStatusSchema = z.object({
   status: z.enum(orderStatuses, { message: "Estado de pedido invalido" }),
 });
@@ -26,10 +19,6 @@ export const updateOrderStatusSchema = z.object({
 export const updateOrderShippingSchema = z.object({
   carrier: z.string().trim().max(80).optional().or(z.literal("")),
   trackingNumber: z.string().trim().max(120).optional().or(z.literal("")),
-});
-
-export const updateOrderInvoiceSchema = z.object({
-  invoiceStatus: z.enum(invoiceStatuses, { message: "Estado de factura invalido" }),
 });
 
 export const updateOrderNotesSchema = z.object({

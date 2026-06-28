@@ -142,8 +142,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           />
           <ProductGrid
             products={products}
-            emptyTitle="No hay productos publicados"
-            emptyDescription="Publica productos en estado PUBLISHED para que aparezcan en el catalogo."
+            emptyTitle="No hay productos"
+            emptyDescription="No encontramos productos con estos filtros. Intenta con otra busqueda o categoria."
           />
 
           {productsPage.totalPages > 1 ? (
