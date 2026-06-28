@@ -36,6 +36,11 @@ export function ProductCard({ product }: ProductCardProps) {
               Nuevo
             </span>
           ) : null}
+          {product.stockAvailable <= 0 ? (
+            <span className="absolute inset-x-0 bottom-0 bg-zinc-950/80 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-white">
+              Agotado
+            </span>
+          ) : null}
         </div>
       </Link>
       <div className="flex flex-1 flex-col p-4">
@@ -68,7 +73,7 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="mt-2 text-xs font-medium text-zinc-500">
             {product.stockAvailable > 0
               ? `${product.stockAvailable} disponibles`
-              : "Disponibilidad por confirmar"}
+              : "Sin stock por ahora"}
           </p>
         </div>
       </div>

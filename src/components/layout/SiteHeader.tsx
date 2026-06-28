@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { signOutAction } from "@/app/(public)/auth-actions";
+import { SearchBox } from "@/components/layout/SearchBox";
 import { auth } from "@/lib/auth";
 import { getCartItemCount } from "@/services/cart.service";
 
@@ -67,6 +68,7 @@ export async function SiteHeader() {
             </Link>
           </div>
         </div>
+        <SearchBox />
         <nav
           aria-label="Principal"
           className="-mx-4 flex gap-1 overflow-x-auto px-4 text-sm font-semibold text-zinc-700 sm:mx-0 sm:flex-wrap sm:px-0"

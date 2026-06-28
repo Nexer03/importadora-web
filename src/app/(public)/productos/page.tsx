@@ -131,8 +131,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <section className="space-y-6">
           <SectionHeader
             eyebrow="Catalogo"
-            title="Productos"
-            description="Listado inicial preparado para filtros, busqueda y consumo desde API movil."
+            title={params.q ? `Resultados para "${params.q}"` : "Productos"}
+            description={
+              params.q
+                ? `${productsPage.total} ${
+                    productsPage.total === 1 ? "resultado" : "resultados"
+                  }.`
+                : "Accesorios importados con filtros por categoria, publico y coleccion."
+            }
           />
           <ProductGrid
             products={products}
