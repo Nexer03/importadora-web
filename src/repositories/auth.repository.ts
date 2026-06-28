@@ -31,6 +31,22 @@ export function getAdminUserById(id: string) {
   });
 }
 
+export function createCustomerUser(data: {
+  name: string;
+  email: string;
+  passwordHash: string;
+}) {
+  return prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      passwordHash: data.passwordHash,
+      role: "CUSTOMER",
+    },
+    select: { id: true, email: true },
+  });
+}
+
 export function getUserByEmail(email: string) {
   return prisma.user.findUnique({
     where: { email },

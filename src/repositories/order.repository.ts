@@ -195,6 +195,15 @@ export function getOrderByNumber(orderNumber: string) {
   });
 }
 
+export function getOrdersByUserId(userId: string) {
+  return prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: { items: { select: { quantity: true } } },
+    take: 50,
+  });
+}
+
 /**
  * Expira reservas de stock vencidas (expiresAt pasado) de ordenes que siguen
  * pendientes de pago: libera el stock, marca las reservas EXPIRED y cancela la

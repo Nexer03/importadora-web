@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/LoginForm";
@@ -65,13 +66,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-10">
       <section className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-          Panel administrador
+          Importadora
         </p>
         <h1 className="mt-3 text-3xl font-black tracking-normal text-zinc-950">
           Iniciar sesion
         </h1>
         <p className="mt-3 text-sm leading-6 text-zinc-600">
-          Ingresa con el usuario administrador para gestionar la tienda.
+          Ingresa con tu correo y contrasena o con Google.
         </p>
         <div className="mt-6">
           <LoginForm
@@ -80,6 +81,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             googleEnabled={isGoogleLoginEnabled}
           />
         </div>
+        <p className="mt-5 text-center text-sm text-zinc-600">
+          No tienes cuenta?{" "}
+          <Link href="/cuenta/registro" className="font-semibold underline">
+            Crear cuenta
+          </Link>
+        </p>
       </section>
     </main>
   );

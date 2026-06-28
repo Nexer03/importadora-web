@@ -35,9 +35,12 @@ export async function SiteHeader() {
           <div className="flex items-center gap-2">
             {user ? (
               <div className="flex items-center gap-2">
-                <span className="hidden text-sm font-semibold text-zinc-700 sm:inline">
+                <Link
+                  href="/cuenta"
+                  className="hidden text-sm font-semibold text-zinc-700 transition hover:text-zinc-950 sm:inline"
+                >
                   Hola, {firstName}
-                </span>
+                </Link>
                 <form action={signOutAction}>
                   <button
                     type="submit"
@@ -49,7 +52,7 @@ export async function SiteHeader() {
               </div>
             ) : (
               <Link
-                href="/login"
+                href="/login?callbackUrl=/cuenta"
                 className="inline-flex h-10 items-center justify-center rounded-md px-3 text-sm font-semibold text-zinc-600 transition hover:text-zinc-950"
               >
                 Iniciar sesion

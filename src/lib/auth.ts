@@ -6,7 +6,7 @@ import { UserRole } from "@prisma/client";
 import {
   getActiveUserByEmail,
   upsertGoogleUser,
-  validateAdminCredentials,
+  validateUserCredentials,
 } from "@/services/auth.service";
 
 export const isGoogleLoginEnabled = Boolean(
@@ -21,7 +21,7 @@ const providers: NextAuthConfig["providers"] = [
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials) {
-      return validateAdminCredentials(credentials);
+      return validateUserCredentials(credentials);
     },
   }),
 ];
