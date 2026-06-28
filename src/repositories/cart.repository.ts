@@ -14,6 +14,9 @@ export const cartWithItemsInclude = {
                 orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }],
                 take: 1,
               },
+              collections: {
+                select: { collectionId: true },
+              },
             },
           },
         },

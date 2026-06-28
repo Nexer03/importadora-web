@@ -17,6 +17,11 @@ import {
   type CartWithItems,
 } from "@/repositories/cart.repository";
 import { tryApplyCoupon, validateCoupon } from "@/services/coupon.service";
+import {
+  resolveProductPrice,
+  type PricingPromotion,
+} from "@/services/pricing.service";
+import { getActivePricingPromotions } from "@/services/promotion.service";
 import type { CartDTO, CartItemDTO } from "@/types/cart";
 import {
   addToCartSchema,
@@ -50,27 +55,39 @@ function toMoney(value: DecimalLike): number {
 }
 
 function getEffectiveUnitPrice(
-  item: CartWithItems["items"][number]
+  item: CartWithItems["items"][number],
+  promotions: PricingPromotion[]
 ): number {
-  const product = item.productVariant.product;
+  const variant = item.productVariant;
+  const product = variant.product;
+
+  // Un precio explicito de variante manda sobre las promociones de producto.
+  if (variant.priceOverride) {
+    return toMoney(variant.priceOverride);
+  }
+
   const basePrice = toMoney(product.basePrice);
   const discountPrice = product.discountPrice
     ? toMoney(product.discountPrice)
     : null;
+  const collectionIds = product.collections.map((c) => c.collectionId);
 
-  const hasDiscount =
-    discountPrice !== null && discountPrice > 0 && discountPrice < basePrice;
-  const productPrice = hasDiscount ? discountPrice : basePrice;
-
-  return item.productVariant.priceOverride
-    ? toMoney(item.productVariant.priceOverride)
-    : productPrice;
+  return resolveProductPrice({
+    basePrice,
+    discountPrice,
+    categoryId: product.categoryId,
+    collectionIds,
+    promotions,
+  }).price;
 }
 
-function toCartItemDTO(item: CartWithItems["items"][number]): CartItemDTO {
+function toCartItemDTO(
+  item: CartWithItems["items"][number],
+  promotions: PricingPromotion[]
+): CartItemDTO {
   const variant = item.productVariant;
   const product = variant.product;
-  const unitPrice = getEffectiveUnitPrice(item);
+  const unitPrice = getEffectiveUnitPrice(item, promotions);
 
   return {
     id: item.id,
@@ -91,7 +108,8 @@ function toCartItemDTO(item: CartWithItems["items"][number]): CartItemDTO {
 }
 
 async function toCartDTO(cart: CartWithItems): Promise<CartDTO> {
-  const items = cart.items.map(toCartItemDTO);
+  const promotions = await getActivePricingPromotions();
+  const items = cart.items.map((item) => toCartItemDTO(item, promotions));
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = items.reduce((total, item) => total + item.lineTotal, 0);
 
@@ -197,9 +215,10 @@ export async function applyCartCoupon(rawCode: string): Promise<CartDTO> {
     throw new CartError("Tu carrito esta vacio.");
   }
 
+  const promotions = await getActivePricingPromotions();
   const subtotal = cart.items.reduce(
     (total, item) =>
-      total + getEffectiveUnitPrice(item) * item.quantity,
+      total + getEffectiveUnitPrice(item, promotions) * item.quantity,
     0
   );
 

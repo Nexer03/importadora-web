@@ -26,6 +26,11 @@ import {
   PUBLIC_PAGE_SIZE,
   type ProductWithPublicRelations,
 } from "@/repositories/product.repository";
+import {
+  resolveProductPrice,
+  type PricingPromotion,
+} from "@/services/pricing.service";
+import { getActivePricingPromotions } from "@/services/promotion.service";
 import type {
   AudiencePageData,
   CatalogHomeData,
@@ -136,25 +141,20 @@ function toPublicVariant(
   };
 }
 
-function getDiscountData(basePrice: number, discountPrice: number | null) {
-  const hasDiscount =
-    discountPrice !== null && discountPrice > 0 && discountPrice < basePrice;
-
-  return {
-    hasDiscount,
-    price: hasDiscount ? discountPrice : basePrice,
-    discountPercentage: hasDiscount
-      ? Math.round(((basePrice - discountPrice) / basePrice) * 100)
-      : null,
-  };
-}
-
 export function toPublicProductCard(
-  product: ProductWithPublicRelations
+  product: ProductWithPublicRelations,
+  promotions: PricingPromotion[] = []
 ): PublicProductCard {
   const basePrice = toMoney(product.basePrice);
-  const discountPrice = toNullableMoney(product.discountPrice);
-  const discount = getDiscountData(basePrice, discountPrice);
+  const manualDiscountPrice = toNullableMoney(product.discountPrice);
+  const collectionIds = product.collections.map((item) => item.collection.id);
+  const pricing = resolveProductPrice({
+    basePrice,
+    discountPrice: manualDiscountPrice,
+    categoryId: product.categoryId,
+    collectionIds,
+    promotions,
+  });
   const activeVariants = product.variants.filter((variant) => variant.isActive);
   const stockAvailable = activeVariants.reduce(
     (total, variant) => total + Math.max(variant.stockAvailable, 0),
@@ -167,10 +167,10 @@ export function toPublicProductCard(
     slug: product.slug,
     shortDescription: product.shortDescription,
     basePrice,
-    discountPrice,
-    price: discount.price,
-    hasDiscount: discount.hasDiscount,
-    discountPercentage: discount.discountPercentage,
+    discountPrice: pricing.hasDiscount ? pricing.price : null,
+    price: pricing.price,
+    hasDiscount: pricing.hasDiscount,
+    discountPercentage: pricing.discountPercentage,
     isFeatured: product.isFeatured,
     isNew: product.isNew,
     primaryImage: getPrimaryImage(product.images),
@@ -184,9 +184,10 @@ export function toPublicProductCard(
 }
 
 export function toPublicProductDetail(
-  product: ProductWithPublicRelations
+  product: ProductWithPublicRelations,
+  promotions: PricingPromotion[] = []
 ): PublicProductDetail {
-  const card = toPublicProductCard(product);
+  const card = toPublicProductCard(product, promotions);
 
   return {
     ...card,
@@ -262,9 +263,10 @@ export async function getCatalogFilters() {
 }
 
 export async function getCatalogHomeData(): Promise<CatalogHomeData> {
-  const [filters, newProducts, discountedProducts, featuredProducts] =
+  const [filters, promotions, newProducts, discountedProducts, featuredProducts] =
     await Promise.all([
       getCatalogFilters(),
+      getActivePricingPromotions(),
       getNewProducts(8),
       getDiscountedProducts(8),
       getFeaturedProducts(8),
@@ -272,27 +274,37 @@ export async function getCatalogHomeData(): Promise<CatalogHomeData> {
 
   return {
     ...filters,
-    newProducts: newProducts.map(toPublicProductCard),
-    discountedProducts: discountedProducts.map(toPublicProductCard),
-    featuredProducts: featuredProducts.map(toPublicProductCard),
+    newProducts: newProducts.map((p) => toPublicProductCard(p, promotions)),
+    discountedProducts: discountedProducts.map((p) =>
+      toPublicProductCard(p, promotions)
+    ),
+    featuredProducts: featuredProducts.map((p) =>
+      toPublicProductCard(p, promotions)
+    ),
   };
 }
 
 export async function getProductsList(
   params: ProductListParams = {}
 ): Promise<PublicProductCard[]> {
-  const products = await getPublicProducts(params);
-  return products.map(toPublicProductCard);
+  const [products, promotions] = await Promise.all([
+    getPublicProducts(params),
+    getActivePricingPromotions(),
+  ]);
+  return products.map((p) => toPublicProductCard(p, promotions));
 }
 
 export async function getProductsPage(
   params: ProductListParams = {}
 ): Promise<ProductsPage> {
   const page = Math.max(1, Math.trunc(params.page ?? 1));
-  const [products, total] = await getPublicProductsPage({ ...params, page });
+  const [[products, total], promotions] = await Promise.all([
+    getPublicProductsPage({ ...params, page }),
+    getActivePricingPromotions(),
+  ]);
 
   return {
-    products: products.map(toPublicProductCard),
+    products: products.map((p) => toPublicProductCard(p, promotions)),
     total,
     page,
     pageSize: PUBLIC_PAGE_SIZE,
@@ -303,16 +315,20 @@ export async function getProductsPage(
 export async function getProductDetail(
   slug: string
 ): Promise<PublicProductDetail | null> {
-  const product = await getProductBySlug(slug);
-  return product ? toPublicProductDetail(product) : null;
+  const [product, promotions] = await Promise.all([
+    getProductBySlug(slug),
+    getActivePricingPromotions(),
+  ]);
+  return product ? toPublicProductDetail(product, promotions) : null;
 }
 
 export async function getCategoryPageData(
   slug: string
 ): Promise<CategoryPageData | null> {
-  const [filters, products] = await Promise.all([
+  const [filters, products, promotions] = await Promise.all([
     getCatalogFilters(),
     getProductsByCategorySlug(slug),
+    getActivePricingPromotions(),
   ]);
 
   const category = filters.categories.find((item) => item.slug === slug);
@@ -323,16 +339,17 @@ export async function getCategoryPageData(
 
   return {
     category,
-    products: products.map(toPublicProductCard),
+    products: products.map((p) => toPublicProductCard(p, promotions)),
   };
 }
 
 export async function getCollectionPageData(
   slug: string
 ): Promise<CollectionPageData | null> {
-  const [collection, products] = await Promise.all([
+  const [collection, products, promotions] = await Promise.all([
     getCollectionBySlug(slug),
     getProductsByCollectionSlug(slug),
+    getActivePricingPromotions(),
   ]);
 
   if (!collection) {
@@ -341,16 +358,17 @@ export async function getCollectionPageData(
 
   return {
     collection: toPublicCollection(collection),
-    products: products.map(toPublicProductCard),
+    products: products.map((p) => toPublicProductCard(p, promotions)),
   };
 }
 
 export async function getAudiencePageData(
   slug: string
 ): Promise<AudiencePageData | null> {
-  const [filters, products] = await Promise.all([
+  const [filters, products, promotions] = await Promise.all([
     getCatalogFilters(),
     getProductsByAudienceSlug(slug),
+    getActivePricingPromotions(),
   ]);
 
   const audience = filters.audiences.find((item) => item.slug === slug);
@@ -361,6 +379,6 @@ export async function getAudiencePageData(
 
   return {
     audience,
-    products: products.map(toPublicProductCard),
+    products: products.map((p) => toPublicProductCard(p, promotions)),
   };
 }

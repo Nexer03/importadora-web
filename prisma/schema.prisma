@@ -74,6 +74,12 @@ enum DiscountType {
   FREE_SHIPPING
 }
 
+enum PromotionScope {
+  ALL
+  CATEGORY
+  COLLECTION
+}
+
 enum InventoryMovementType {
   INITIAL_STOCK
   MANUAL_ADJUSTMENT
@@ -172,7 +178,8 @@ model Category {
   indexable      Boolean @default(true)
   ogImage        String?
 
-  products Product[]
+  products   Product[]
+  promotions Promotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -211,7 +218,8 @@ model Collection {
   indexable      Boolean @default(true)
   ogImage        String?
 
-  products ProductCollection[]
+  products   ProductCollection[]
+  promotions Promotion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -529,6 +537,30 @@ model CouponRedemption {
   @@index([couponId])
   @@index([orderId])
   @@map("coupon_redemptions")
+}
+
+model Promotion {
+  id            String         @id @default(cuid())
+  name          String
+  discountType  DiscountType
+  discountValue Decimal        @db.Decimal(10, 2)
+  scope         PromotionScope @default(ALL)
+  categoryId    String?
+  collectionId  String?
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean        @default(true)
+
+  category   Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([categoryId])
+  @@index([collectionId])
+  @@map("promotions")
 }
 
 model HomeSection {

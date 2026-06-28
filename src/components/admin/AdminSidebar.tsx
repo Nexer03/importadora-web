@@ -7,7 +7,8 @@ const navItems = [
   { href: "/admin/categorias", label: "Categorias" },
   { href: "/admin/publicos", label: "Publicos" },
   { href: "/admin/colecciones", label: "Colecciones" },
-  { href: "/admin/promociones", label: "Promociones" },
+  { href: "/admin/promociones", label: "Cupones" },
+  { href: "/admin/descuentos", label: "Descuentos" },
   { href: "/admin/home", label: "Home" },
   { href: "/admin/settings", label: "Settings" },
 ];
