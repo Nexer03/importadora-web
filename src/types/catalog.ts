@@ -112,6 +112,15 @@ export type ProductListParams = {
   audience?: string;
   q?: string;
   limit?: number;
+  page?: number;
+};
+
+export type ProductsPage = {
+  products: PublicProductCard[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 };
 
 export type CatalogHomeData = {

@@ -22,6 +22,8 @@ import {
   getProductsByCategorySlug,
   getProductsByCollectionSlug,
   getPublicProducts,
+  getPublicProductsPage,
+  PUBLIC_PAGE_SIZE,
   type ProductWithPublicRelations,
 } from "@/repositories/product.repository";
 import type {
@@ -34,6 +36,7 @@ import type {
   PublicAudience,
   PublicCategory,
   PublicCollection,
+  ProductsPage,
   PublicProductCard,
   PublicProductDetail,
   PublicProductImage,
@@ -280,6 +283,21 @@ export async function getProductsList(
 ): Promise<PublicProductCard[]> {
   const products = await getPublicProducts(params);
   return products.map(toPublicProductCard);
+}
+
+export async function getProductsPage(
+  params: ProductListParams = {}
+): Promise<ProductsPage> {
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const [products, total] = await getPublicProductsPage({ ...params, page });
+
+  return {
+    products: products.map(toPublicProductCard),
+    total,
+    page,
+    pageSize: PUBLIC_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / PUBLIC_PAGE_SIZE)),
+  };
 }
 
 export async function getProductDetail(

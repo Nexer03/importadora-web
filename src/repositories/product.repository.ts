@@ -96,6 +96,24 @@ export function getPublicProducts(params: ProductListParams = {}) {
   });
 }
 
+export const PUBLIC_PAGE_SIZE = 24;
+
+export function getPublicProductsPage(params: ProductListParams = {}) {
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const where = buildPublicProductWhere(params);
+
+  return Promise.all([
+    prisma.product.findMany({
+      where,
+      include: publicProductInclude,
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      skip: (page - 1) * PUBLIC_PAGE_SIZE,
+      take: PUBLIC_PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
+}
+
 export function getFeaturedProducts(limit = 8) {
   return prisma.product.findMany({
     where: {

@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 
 import { ProductGrid } from "@/components/catalog/ProductGrid";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import Link from "next/link";
+
 import {
   getCatalogFilters,
-  getProductsList,
+  getProductsPage,
 } from "@/services/catalog.service";
 import type { ProductListParams } from "@/types/catalog";
 
@@ -16,6 +18,7 @@ type ProductsSearchParams = {
   collection?: string | string[];
   audience?: string | string[];
   q?: string | string[];
+  page?: string | string[];
 };
 
 type ProductsPageProps = {
@@ -26,16 +29,26 @@ function getParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
 }
 
-function buildProductParams(searchParams: ProductsSearchParams) {
-  const params: ProductListParams = {
+function buildProductParams(searchParams: ProductsSearchParams): ProductListParams {
+  const rawPage = Number(getParam(searchParams.page));
+  return {
     category: getParam(searchParams.category),
     collection: getParam(searchParams.collection),
     audience: getParam(searchParams.audience),
     q: getParam(searchParams.q),
-    limit: 36,
+    page: Number.isFinite(rawPage) && rawPage > 0 ? Math.trunc(rawPage) : 1,
   };
+}
 
-  return params;
+function buildPageHref(params: ProductListParams, page: number): string {
+  const search = new URLSearchParams();
+  if (params.category) search.set("category", params.category);
+  if (params.collection) search.set("collection", params.collection);
+  if (params.audience) search.set("audience", params.audience);
+  if (params.q) search.set("q", params.q);
+  if (page > 1) search.set("page", String(page));
+  const query = search.toString();
+  return query ? `/productos?${query}` : "/productos";
 }
 
 export async function generateMetadata({
@@ -56,10 +69,11 @@ export async function generateMetadata({
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = buildProductParams(await searchParams);
-  const [filters, products] = await Promise.all([
+  const [filters, productsPage] = await Promise.all([
     getCatalogFilters(),
-    getProductsList(params),
+    getProductsPage(params),
   ]);
+  const products = productsPage.products;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -125,6 +139,37 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             emptyTitle="No hay productos publicados"
             emptyDescription="Publica productos en estado PUBLISHED para que aparezcan en el catalogo."
           />
+
+          {productsPage.totalPages > 1 ? (
+            <nav
+              aria-label="Paginacion"
+              className="flex items-center justify-between border-t border-zinc-200 pt-6"
+            >
+              {productsPage.page > 1 ? (
+                <Link
+                  href={buildPageHref(params, productsPage.page - 1)}
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
+                >
+                  Anterior
+                </Link>
+              ) : (
+                <span />
+              )}
+              <span className="text-sm text-zinc-600">
+                Pagina {productsPage.page} de {productsPage.totalPages}
+              </span>
+              {productsPage.page < productsPage.totalPages ? (
+                <Link
+                  href={buildPageHref(params, productsPage.page + 1)}
+                  className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
+                >
+                  Siguiente
+                </Link>
+              ) : (
+                <span />
+              )}
+            </nav>
+          ) : null}
         </section>
       </div>
     </div>
