@@ -8,9 +8,14 @@ import { signIn } from "next-auth/react";
 type LoginFormProps = {
   callbackUrl: string;
   initialError?: string;
+  googleEnabled?: boolean;
 };
 
-export function LoginForm({ callbackUrl, initialError }: LoginFormProps) {
+export function LoginForm({
+  callbackUrl,
+  initialError,
+  googleEnabled = false,
+}: LoginFormProps) {
   const router = useRouter();
   const [error, setError] = useState(initialError ?? "");
   const [isPending, startTransition] = useTransition();
@@ -79,6 +84,23 @@ export function LoginForm({ callbackUrl, initialError }: LoginFormProps) {
       >
         {isPending ? "Iniciando..." : "Iniciar sesion"}
       </button>
+
+      {googleEnabled ? (
+        <>
+          <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-zinc-400">
+            <span className="h-px flex-1 bg-zinc-200" />
+            o
+            <span className="h-px flex-1 bg-zinc-200" />
+          </div>
+          <button
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-5 text-sm font-bold text-zinc-950 transition hover:border-zinc-950"
+          >
+            Continuar con Google
+          </button>
+        </>
+      ) : null}
 
       <Link
         href="/"

@@ -3,7 +3,9 @@ import bcrypt from "bcryptjs";
 
 import {
   getAdminUserById,
+  getUserByEmail,
   getUserForCredentials,
+  upsertGoogleCustomer,
 } from "@/repositories/auth.repository";
 import {
   adminLoginSchema,
@@ -70,4 +72,36 @@ export async function getActiveAdminUserById(
   }
 
   return user;
+}
+
+export type AuthUser = {
+  id: string;
+  role: UserRole;
+  isActive: boolean;
+};
+
+/**
+ * Crea/actualiza el usuario CUSTOMER del perfil de Google y devuelve sus datos
+ * de sesion (id real de la BD, rol y estado).
+ */
+export async function upsertGoogleUser(profile: {
+  email: string;
+  name?: string | null;
+  image?: string | null;
+}): Promise<AuthUser> {
+  return upsertGoogleCustomer({
+    email: profile.email.toLowerCase(),
+    name: profile.name ?? null,
+    image: profile.image ?? null,
+  });
+}
+
+export async function getActiveUserByEmail(
+  email: string
+): Promise<AuthUser | null> {
+  const user = await getUserByEmail(email.toLowerCase());
+  if (!user || !user.isActive) {
+    return null;
+  }
+  return { id: user.id, role: user.role, isActive: user.isActive };
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/LoginForm";
+import { isGoogleLoginEnabled } from "@/lib/auth";
 import {
   isAdminAccessError,
   requireAdminAccess,
@@ -41,19 +42,23 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const callbackUrl = getSafeCallbackUrl(getSingleParam(params.callbackUrl));
   const error = getSingleParam(params.error);
-  let shouldRedirect = false;
+  let redirectTarget: string | null = null;
 
   try {
     await requireAdminAccess();
-    shouldRedirect = true;
+    redirectTarget = callbackUrl;
   } catch (accessError) {
     if (!isAdminAccessError(accessError)) {
       throw accessError;
     }
+    // Usuario autenticado pero sin rol admin (cliente Google): va al inicio.
+    if (accessError.reason === "FORBIDDEN") {
+      redirectTarget = "/";
+    }
   }
 
-  if (shouldRedirect) {
-    redirect(callbackUrl);
+  if (redirectTarget) {
+    redirect(redirectTarget);
   }
 
   return (
@@ -72,6 +77,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <LoginForm
             callbackUrl={callbackUrl}
             initialError={error ? "Credenciales invalidas" : undefined}
+            googleEnabled={isGoogleLoginEnabled}
           />
         </div>
       </section>
