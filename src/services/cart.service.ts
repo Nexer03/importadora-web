@@ -16,6 +16,7 @@ import {
   updateCartItemQuantity,
   type CartWithItems,
 } from "@/repositories/cart.repository";
+import { getOrderByNumber } from "@/repositories/order.repository";
 import { tryApplyCoupon, validateCoupon } from "@/services/coupon.service";
 import {
   resolveProductPrice,
@@ -344,6 +345,35 @@ export async function updateCartItem(input: unknown): Promise<CartDTO> {
   await updateCartItemQuantity(item.id, Math.max(finalQuantity, 1));
   await touchCart(cart.id);
   return getCart();
+}
+
+/**
+ * Vuelve a agregar al carrito los productos de un pedido previo. Los items que
+ * ya no esten disponibles (variante inactiva, agotada) se omiten.
+ */
+export async function reorderToCart(
+  orderNumber: string
+): Promise<{ added: number; skipped: number }> {
+  const order = await getOrderByNumber(orderNumber);
+  if (!order) {
+    return { added: 0, skipped: 0 };
+  }
+
+  let added = 0;
+  let skipped = 0;
+  for (const item of order.items) {
+    try {
+      await addToCart({
+        variantId: item.productVariantId,
+        quantity: item.quantity,
+      });
+      added += 1;
+    } catch {
+      skipped += 1;
+    }
+  }
+
+  return { added, skipped };
 }
 
 export async function removeCartItem(input: unknown): Promise<CartDTO> {

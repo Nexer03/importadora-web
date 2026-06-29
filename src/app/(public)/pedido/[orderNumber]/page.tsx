@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { reorderAction } from "@/app/(public)/carrito/actions";
 import { getOrderDetail } from "@/services/checkout.service";
 import { formatMXN } from "@/utils/format";
 
@@ -183,10 +184,19 @@ export default async function OrderConfirmationPage({ params }: OrderPageProps) 
         </div>
       </div>
 
-      <div className="mt-8 flex justify-center">
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
+        <form action={reorderAction}>
+          <input type="hidden" name="orderNumber" value={order.orderNumber} />
+          <button
+            type="submit"
+            className="inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-5 text-sm font-bold text-white"
+          >
+            Volver a comprar
+          </button>
+        </form>
         <Link
           href="/productos"
-          className="inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-5 text-sm font-bold text-white"
+          className="inline-flex h-11 items-center justify-center rounded-md border border-zinc-300 px-5 text-sm font-bold text-zinc-950"
         >
           Seguir comprando
         </Link>
