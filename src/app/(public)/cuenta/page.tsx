@@ -62,6 +62,21 @@ export default async function AccountPage() {
         </div>
       ) : null}
 
+      <div className="mt-6 flex flex-wrap gap-3">
+        <Link
+          href="/cuenta/perfil"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
+        >
+          Editar perfil
+        </Link>
+        <Link
+          href="/cuenta/direcciones"
+          className="inline-flex h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-semibold text-zinc-950 transition hover:border-zinc-950"
+        >
+          Mis direcciones
+        </Link>
+      </div>
+
       <div className="mt-8">
         <h2 className="text-lg font-black text-zinc-950">Mis pedidos</h2>
         {orders.length === 0 ? (

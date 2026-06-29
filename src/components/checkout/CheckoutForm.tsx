@@ -12,6 +12,17 @@ import { formatMXN } from "@/utils/format";
 
 const INITIAL_STATE: CheckoutFormState = {};
 
+type CheckoutDefaults = {
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  shippingAddress: string;
+  postalCode: string;
+  city: string;
+  state: string;
+  addressReference: string;
+};
+
 type CheckoutFormProps = {
   shippingOptions: ShippingOption[];
   subtotal: number;
@@ -19,6 +30,7 @@ type CheckoutFormProps = {
   discountAmount: number;
   couponCode: string | null;
   freeShipping: boolean;
+  defaults: CheckoutDefaults;
 };
 
 const inputClass =
@@ -33,6 +45,7 @@ export function CheckoutForm({
   discountAmount,
   couponCode,
   freeShipping,
+  defaults,
 }: CheckoutFormProps) {
   const [state, formAction, pending] = useActionState(
     submitCheckoutAction,
@@ -64,7 +77,13 @@ export function CheckoutForm({
             <label className={labelClass} htmlFor="customerName">
               Nombre completo
             </label>
-            <input id="customerName" name="customerName" required className={inputClass} />
+            <input
+              id="customerName"
+              name="customerName"
+              required
+              defaultValue={defaults.customerName}
+              className={inputClass}
+            />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
@@ -76,6 +95,7 @@ export function CheckoutForm({
                 name="customerEmail"
                 type="email"
                 required
+                defaultValue={defaults.customerEmail}
                 className={inputClass}
               />
             </div>
@@ -87,6 +107,7 @@ export function CheckoutForm({
                 id="customerPhone"
                 name="customerPhone"
                 required
+                defaultValue={defaults.customerPhone}
                 className={inputClass}
               />
             </div>
@@ -136,6 +157,7 @@ export function CheckoutForm({
                 id="shippingAddress"
                 name="shippingAddress"
                 required={needsAddress}
+                defaultValue={defaults.shippingAddress}
                 className={inputClass}
               />
             </div>
@@ -144,26 +166,26 @@ export function CheckoutForm({
                 <label className={labelClass} htmlFor="postalCode">
                   Codigo postal
                 </label>
-                <input id="postalCode" name="postalCode" required={needsAddress} className={inputClass} />
+                <input id="postalCode" name="postalCode" required={needsAddress} defaultValue={defaults.postalCode} className={inputClass} />
               </div>
               <div>
                 <label className={labelClass} htmlFor="city">
                   Ciudad
                 </label>
-                <input id="city" name="city" required={needsAddress} className={inputClass} />
+                <input id="city" name="city" required={needsAddress} defaultValue={defaults.city} className={inputClass} />
               </div>
               <div>
                 <label className={labelClass} htmlFor="state">
                   Estado
                 </label>
-                <input id="state" name="state" required={needsAddress} className={inputClass} />
+                <input id="state" name="state" required={needsAddress} defaultValue={defaults.state} className={inputClass} />
               </div>
             </div>
             <div>
               <label className={labelClass} htmlFor="addressReference">
                 Referencia (opcional)
               </label>
-              <input id="addressReference" name="addressReference" className={inputClass} />
+              <input id="addressReference" name="addressReference" defaultValue={defaults.addressReference} className={inputClass} />
             </div>
           </fieldset>
         ) : (

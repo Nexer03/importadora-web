@@ -47,6 +47,29 @@ export function createCustomerUser(data: {
   });
 }
 
+export function getUserPasswordHash(id: string) {
+  return prisma.user.findUnique({
+    where: { id },
+    select: { passwordHash: true },
+  });
+}
+
+export function updateUserName(id: string, name: string) {
+  return prisma.user.update({
+    where: { id },
+    data: { name },
+    select: { id: true, name: true },
+  });
+}
+
+export function updateUserPassword(id: string, passwordHash: string) {
+  return prisma.user.update({
+    where: { id },
+    data: { passwordHash },
+    select: { id: true },
+  });
+}
+
 export function getUserByEmail(email: string) {
   return prisma.user.findUnique({
     where: { email },

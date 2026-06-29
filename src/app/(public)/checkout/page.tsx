@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { getCurrentUser } from "@/services/account.service";
+import { getDefaultAddressForCheckout } from "@/services/address.service";
 import { getCheckoutCart } from "@/services/cart.service";
 import { tryApplyCoupon } from "@/services/coupon.service";
 import { getAvailablePaymentMethods } from "@/services/payments/registry";
@@ -30,6 +32,21 @@ export default async function CheckoutPage() {
   const appliedCoupon = checkoutCart.couponCode
     ? await tryApplyCoupon(checkoutCart.couponCode, checkoutCart.subtotal)
     : null;
+
+  const [user, defaultAddress] = await Promise.all([
+    getCurrentUser(),
+    getDefaultAddressForCheckout(),
+  ]);
+  const defaults = {
+    customerName: defaultAddress?.fullName ?? user?.name ?? "",
+    customerEmail: user?.email ?? "",
+    customerPhone: defaultAddress?.phone ?? "",
+    shippingAddress: defaultAddress?.address ?? "",
+    postalCode: defaultAddress?.postalCode ?? "",
+    city: defaultAddress?.city ?? "",
+    state: defaultAddress?.state ?? "",
+    addressReference: defaultAddress?.reference ?? "",
+  };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
@@ -66,6 +83,7 @@ export default async function CheckoutPage() {
           discountAmount={appliedCoupon?.discountAmount ?? 0}
           couponCode={appliedCoupon?.code ?? null}
           freeShipping={appliedCoupon?.freeShipping ?? false}
+          defaults={defaults}
         />
       </div>
     </div>

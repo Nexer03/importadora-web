@@ -1,0 +1,46 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { createAddressAction } from "@/app/(public)/cuenta/direcciones/actions";
+import { AddressForm } from "@/components/account/AddressForm";
+import { getCurrentUser } from "@/services/account.service";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+export const metadata: Metadata = {
+  title: "Nueva direccion",
+  robots: { index: false, follow: false },
+};
+
+type PageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function NewAddressPage({ searchParams }: PageProps) {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login?callbackUrl=/cuenta/direcciones");
+  }
+  const { error } = await searchParams;
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+      <Link href="/cuenta/direcciones" className="text-sm font-semibold underline">
+        ← Mis direcciones
+      </Link>
+      <h1 className="mt-3 text-3xl font-black tracking-normal text-zinc-950">
+        Nueva direccion
+      </h1>
+      {error ? (
+        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">
+          {decodeURIComponent(error)}
+        </p>
+      ) : null}
+      <div className="mt-6 rounded-lg border border-zinc-200 bg-white p-6">
+        <AddressForm action={createAddressAction} submitLabel="Guardar direccion" />
+      </div>
+    </div>
+  );
+}
