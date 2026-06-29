@@ -4,6 +4,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/inventario", label: "Inventario" },
   { href: "/admin/categorias", label: "Categorias" },
   { href: "/admin/publicos", label: "Publicos" },
   { href: "/admin/colecciones", label: "Colecciones" },
