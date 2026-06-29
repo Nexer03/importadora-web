@@ -7,6 +7,7 @@ import {
   type AdminCouponRow,
 } from "@/repositories/admin/coupon-admin.repository";
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import { normalizeCouponCode } from "@/services/coupon.service";
 import {
   couponInputSchema,
@@ -81,9 +82,15 @@ export async function getAdminCouponDetail(id: string) {
 }
 
 export async function createAdminCoupon(raw: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const input = validateAdminInput(couponInputSchema, raw);
-  return createCoupon(mapCouponData(input));
+  const coupon = await createCoupon(mapCouponData(input));
+  await logAdminAction(admin.id, "Cupon creado", {
+    entity: "coupon",
+    entityId: coupon.id,
+    detail: coupon.code,
+  });
+  return coupon;
 }
 
 export async function updateAdminCoupon(id: string, raw: unknown) {

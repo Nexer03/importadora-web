@@ -1,6 +1,7 @@
 import { ProductStatus } from "@prisma/client";
 
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import type {
   DefaultProductVariantInput,
   ProductImageInput,
@@ -319,7 +320,7 @@ export async function createAdminProduct(
   rawProduct: unknown,
   rawDefaultVariant: unknown
 ) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = validateAdminInput(productInputSchema, rawProduct);
   const variant = validateAdminInput(
     defaultProductVariantInputSchema,
@@ -331,19 +332,35 @@ export async function createAdminProduct(
     mapDefaultVariantData(variant)
   );
 
+  await logAdminAction(admin.id, "Producto creado", {
+    entity: "product",
+    entityId: created.id,
+    detail: created.name,
+  });
+
   return mapProduct(created);
 }
 
 export async function updateAdminProduct(id: string, rawProduct: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = validateAdminInput(productInputSchema, rawProduct);
   const updated = await updateProduct(id, mapProductData(product));
+  await logAdminAction(admin.id, "Producto actualizado", {
+    entity: "product",
+    entityId: id,
+    detail: `${updated.name} · ${updated.status} · ${updated.basePrice}`,
+  });
   return mapProduct(updated);
 }
 
 export async function archiveAdminProduct(id: string) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = await archiveProduct(id);
+  await logAdminAction(admin.id, "Producto archivado", {
+    entity: "product",
+    entityId: id,
+    detail: product.name,
+  });
   return mapProduct(product);
 }
 

@@ -13,6 +13,7 @@ import {
   type AdminOrderWithRelations,
 } from "@/repositories/admin/order-admin.repository";
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import {
   updateOrderNotesSchema,
   updateOrderShippingSchema,
@@ -200,9 +201,15 @@ export async function getAdminOrderDetail(id: string) {
 }
 
 export async function updateAdminOrderStatus(id: string, raw: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const { status } = validateAdminInput(updateOrderStatusSchema, raw);
-  return updateOrderStatus(id, status as OrderStatus);
+  const result = await updateOrderStatus(id, status as OrderStatus);
+  await logAdminAction(admin.id, "Cambio de estado de pedido", {
+    entity: "order",
+    entityId: id,
+    detail: `Estado: ${status}`,
+  });
+  return result;
 }
 
 export async function updateAdminOrderShipping(id: string, raw: unknown) {

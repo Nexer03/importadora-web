@@ -9,6 +9,7 @@ import {
   type AdminPromotionRow,
 } from "@/repositories/admin/promotion-admin.repository";
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import {
   promotionInputSchema,
   type PromotionInput,
@@ -90,9 +91,15 @@ export async function getPromotionTargets() {
 }
 
 export async function createAdminPromotion(raw: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const input = validateAdminInput(promotionInputSchema, raw);
-  return createPromotion(mapPromotionData(input));
+  const promo = await createPromotion(mapPromotionData(input));
+  await logAdminAction(admin.id, "Descuento creado", {
+    entity: "promotion",
+    entityId: promo.id,
+    detail: promo.name,
+  });
+  return promo;
 }
 
 export async function updateAdminPromotion(id: string, raw: unknown) {

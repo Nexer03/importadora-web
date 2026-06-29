@@ -11,6 +11,7 @@ const navItems = [
   { href: "/admin/promociones", label: "Cupones" },
   { href: "/admin/descuentos", label: "Descuentos" },
   { href: "/admin/home", label: "Home" },
+  { href: "/admin/auditoria", label: "Auditoria" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

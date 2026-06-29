@@ -117,11 +117,28 @@ model User {
   carts              Cart[]
   orders             Order[]
   addresses          Address[]
+  auditLogs          AuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model AuditLog {
+  id       String  @id @default(cuid())
+  userId   String?
+  action   String
+  entity   String?
+  entityId String?
+  detail   String? @db.Text
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("admin_audit_logs")
 }
 
 model Address {
