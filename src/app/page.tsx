@@ -7,7 +7,7 @@ import { HomeBenefits } from "@/components/home/HomeBenefits";
 import { HomeProductSection } from "@/components/home/HomeProductSection";
 import { PromoBanner } from "@/components/home/PromoBanner";
 import { getHomePageData } from "@/services/home.service";
-import { buildDefaultMetadata } from "@/services/seo.service";
+import { buildDefaultMetadata, getSiteUrl } from "@/services/seo.service";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -46,8 +46,35 @@ export default async function HomePage() {
     },
   ];
 
+  const siteUrl = getSiteUrl().replace(/\/$/, "");
+  const storeName = data.settings.store_name ?? "Importadora";
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: storeName,
+        url: siteUrl,
+      },
+      {
+        "@type": "WebSite",
+        name: storeName,
+        url: siteUrl,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${siteUrl}/productos?q={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <AnnouncementBar message={data.settings.announcement_bar} />
       <SiteHeader />
       <main className="flex-1">

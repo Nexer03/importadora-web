@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { deleteOrDeactivateAudienceAction } from "@/app/(admin)/admin/actions/audiences.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminTable, AdminTd, AdminTh } from "@/components/admin/AdminTable";
@@ -62,9 +63,12 @@ export default async function AdminAudiencesPage({ searchParams }: PageProps) {
                   </Link>
                   <form action={deleteOrDeactivateAudienceAction}>
                     <input type="hidden" name="id" value={audience.id} />
-                    <button type="submit" className="font-bold underline">
+                    <ConfirmSubmitButton
+                      className="font-bold underline"
+                      message="Desactivar este publico?"
+                    >
                       Desactivar
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </div>
               </AdminTd>

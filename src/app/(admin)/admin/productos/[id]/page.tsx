@@ -17,6 +17,7 @@ import {
 } from "@/app/(admin)/admin/actions/products.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
 import { AdminCard } from "@/components/admin/AdminCard";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import {
   AdminCheckbox,
   AdminField,
@@ -85,12 +86,12 @@ export default async function ProductEditPage({
           />
           <form action={archiveProductAction} className="mt-4">
             <input type="hidden" name="id" value={product.id} />
-            <button
-              type="submit"
+            <ConfirmSubmitButton
               className="inline-flex h-10 items-center rounded-md border border-zinc-300 px-4 text-sm font-bold text-zinc-950"
+              message="Archivar este producto? Dejara de mostrarse en la tienda."
             >
               Archivar producto
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </AdminCard>
 

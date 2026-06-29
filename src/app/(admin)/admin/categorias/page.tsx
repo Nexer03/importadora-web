@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { deleteOrDeactivateCategoryAction } from "@/app/(admin)/admin/actions/categories.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminTable, AdminTd, AdminTh } from "@/components/admin/AdminTable";
@@ -62,9 +63,12 @@ export default async function AdminCategoriesPage({ searchParams }: PageProps) {
                   </Link>
                   <form action={deleteOrDeactivateCategoryAction}>
                     <input type="hidden" name="id" value={category.id} />
-                    <button type="submit" className="font-bold underline">
+                    <ConfirmSubmitButton
+                      className="font-bold underline"
+                      message="Desactivar esta categoria?"
+                    >
                       Desactivar
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </div>
               </AdminTd>

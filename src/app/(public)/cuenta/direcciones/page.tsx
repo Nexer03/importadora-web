@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { deleteAddressAction } from "@/app/(public)/cuenta/direcciones/actions";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { getCustomerAddresses } from "@/services/address.service";
 import { getCurrentUser } from "@/services/account.service";
 
@@ -79,12 +80,12 @@ export default async function AddressesPage() {
                 </Link>
                 <form action={deleteAddressAction}>
                   <input type="hidden" name="id" value={address.id} />
-                  <button
-                    type="submit"
+                  <ConfirmSubmitButton
                     className="font-semibold text-zinc-500 underline hover:text-red-600"
+                    message="Eliminar esta direccion?"
                   >
                     Eliminar
-                  </button>
+                  </ConfirmSubmitButton>
                 </form>
               </div>
             </li>
