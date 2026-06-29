@@ -1,9 +1,11 @@
 import { OrderStatus } from "@prisma/client";
 
 import {
+  ADMIN_ORDERS_PAGE_SIZE,
   getAdminOrderById,
-  getAdminOrders,
+  getAdminOrdersPage,
   getOrderMetrics,
+  getRecentOrders,
   updateOrderNotes,
   updateOrderShipping,
   updateOrderStatus,
@@ -166,21 +168,28 @@ function mapDetail(order: AdminOrderWithRelations): AdminOrderDetailDTO {
   };
 }
 
-export async function getAdminOrdersList() {
+export async function getAdminOrdersList(params: { q?: string; page?: number } = {}) {
   await requireAdminAccess();
-  const orders = await getAdminOrders();
-  return orders.map(mapListItem);
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const [orders, total] = await getAdminOrdersPage({ q: params.q, page });
+  return {
+    orders: orders.map(mapListItem),
+    total,
+    page,
+    pageSize: ADMIN_ORDERS_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / ADMIN_ORDERS_PAGE_SIZE)),
+  };
 }
 
 export async function getAdminOrderDashboard() {
   await requireAdminAccess();
   const [metrics, orders] = await Promise.all([
     getOrderMetrics(),
-    getAdminOrders(),
+    getRecentOrders(5),
   ]);
   return {
     metrics,
-    recentOrders: orders.slice(0, 5).map(mapListItem),
+    recentOrders: orders.map(mapListItem),
   };
 }
 

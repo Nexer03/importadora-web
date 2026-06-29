@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AdminBadge } from "@/components/admin/AdminBadge";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
 import {
   AdminTable,
   AdminTd,
@@ -15,7 +17,12 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type ProductsAdminPageProps = {
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    q?: string;
+    page?: string;
+  }>;
 };
 
 function formatDate(date: Date) {
@@ -27,10 +34,19 @@ function formatDate(date: Date) {
 export default async function AdminProductsPage({
   searchParams,
 }: ProductsAdminPageProps) {
-  const [params, products] = await Promise.all([
-    searchParams,
-    getAdminProductsList(),
-  ]);
+  const params = await searchParams;
+  const q = params.q?.trim();
+  const pageNum = Math.max(1, Math.trunc(Number(params.page) || 1));
+  const data = await getAdminProductsList({ q, page: pageNum });
+  const products = data.products;
+
+  function makeHref(page: number) {
+    const search = new URLSearchParams();
+    if (q) search.set("q", q);
+    if (page > 1) search.set("page", String(page));
+    const query = search.toString();
+    return query ? `/admin/productos?${query}` : "/admin/productos";
+  }
 
   return (
     <>
@@ -41,18 +57,27 @@ export default async function AdminProductsPage({
         actionLabel="Nuevo producto"
       />
       <AdminNotice error={params.error} saved={params.saved} />
+      <AdminSearch
+        action="/admin/productos"
+        placeholder="Buscar por nombre, slug o SKU…"
+        defaultValue={q}
+      />
 
       {products.length === 0 ? (
         <div className="rounded-lg border border-dashed border-zinc-300 bg-white p-8 text-center">
           <p className="text-sm font-semibold text-zinc-600">
-            Aun no hay productos creados.
+            {q
+              ? "No hay productos que coincidan con la busqueda."
+              : "Aun no hay productos creados."}
           </p>
-          <Link
-            href="/admin/productos/nuevo"
-            className="mt-4 inline-flex h-10 items-center rounded-md bg-zinc-950 px-4 text-sm font-bold text-white"
-          >
-            Crear producto
-          </Link>
+          {q ? null : (
+            <Link
+              href="/admin/productos/nuevo"
+              className="mt-4 inline-flex h-10 items-center rounded-md bg-zinc-950 px-4 text-sm font-bold text-white"
+            >
+              Crear producto
+            </Link>
+          )}
         </div>
       ) : (
         <AdminTable>
@@ -107,6 +132,12 @@ export default async function AdminProductsPage({
           </tbody>
         </AdminTable>
       )}
+
+      <AdminPagination
+        page={data.page}
+        totalPages={data.totalPages}
+        makeHref={makeHref}
+      />
     </>
   );
 }

@@ -27,11 +27,31 @@ export type AdminProductWithRelations = Prisma.ProductGetPayload<{
   include: typeof adminProductInclude;
 }>;
 
-export function getAdminProducts() {
-  return prisma.product.findMany({
-    include: adminProductInclude,
-    orderBy: [{ createdAt: "desc" }],
-  });
+export const ADMIN_PRODUCTS_PAGE_SIZE = 20;
+
+export function getAdminProductsPage(params: { q?: string; page?: number } = {}) {
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const q = params.q?.trim();
+  const where: Prisma.ProductWhereInput = q
+    ? {
+        OR: [
+          { name: { contains: q } },
+          { slug: { contains: q } },
+          { variants: { some: { sku: { contains: q } } } },
+        ],
+      }
+    : {};
+
+  return Promise.all([
+    prisma.product.findMany({
+      where,
+      include: adminProductInclude,
+      orderBy: [{ createdAt: "desc" }],
+      skip: (page - 1) * ADMIN_PRODUCTS_PAGE_SIZE,
+      take: ADMIN_PRODUCTS_PAGE_SIZE,
+    }),
+    prisma.product.count({ where }),
+  ]);
 }
 
 export function getLatestAdminProducts(limit = 6) {

@@ -29,8 +29,9 @@ import {
   createProductWithVariant,
   deleteProductImage,
   deleteProductVariant,
+  ADMIN_PRODUCTS_PAGE_SIZE,
   getAdminProductById,
-  getAdminProducts,
+  getAdminProductsPage,
   getAdminProductStatusCounts,
   getLatestAdminProducts,
   setPrimaryProductImage,
@@ -243,10 +244,19 @@ function mapImageData(data: ProductImageInput) {
   };
 }
 
-export async function getAdminProductsList() {
+export async function getAdminProductsList(
+  params: { q?: string; page?: number } = {}
+) {
   await requireAdminAccess();
-  const products = await getAdminProducts();
-  return products.map(mapProduct);
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const [products, total] = await getAdminProductsPage({ q: params.q, page });
+  return {
+    products: products.map(mapProduct),
+    total,
+    page,
+    pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / ADMIN_PRODUCTS_PAGE_SIZE)),
+  };
 }
 
 export async function getAdminProductDetail(id: string) {
