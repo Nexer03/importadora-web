@@ -19,7 +19,17 @@ type ProductsSearchParams = {
   audience?: string | string[];
   q?: string | string[];
   page?: string | string[];
+  sort?: string | string[];
+  minPrice?: string | string[];
+  maxPrice?: string | string[];
 };
+
+const sortValues = ["newest", "price_asc", "price_desc"] as const;
+
+function parsePositiveNumber(value?: string) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+}
 
 type ProductsPageProps = {
   searchParams: Promise<ProductsSearchParams>;
@@ -31,12 +41,19 @@ function getParam(value?: string | string[]) {
 
 function buildProductParams(searchParams: ProductsSearchParams): ProductListParams {
   const rawPage = Number(getParam(searchParams.page));
+  const rawSort = getParam(searchParams.sort);
+  const sort = sortValues.includes(rawSort as (typeof sortValues)[number])
+    ? (rawSort as ProductListParams["sort"])
+    : undefined;
   return {
     category: getParam(searchParams.category),
     collection: getParam(searchParams.collection),
     audience: getParam(searchParams.audience),
     q: getParam(searchParams.q),
     page: Number.isFinite(rawPage) && rawPage > 0 ? Math.trunc(rawPage) : 1,
+    sort,
+    minPrice: parsePositiveNumber(getParam(searchParams.minPrice)),
+    maxPrice: parsePositiveNumber(getParam(searchParams.maxPrice)),
   };
 }
 
@@ -46,6 +63,9 @@ function buildPageHref(params: ProductListParams, page: number): string {
   if (params.collection) search.set("collection", params.collection);
   if (params.audience) search.set("audience", params.audience);
   if (params.q) search.set("q", params.q);
+  if (params.sort) search.set("sort", params.sort);
+  if (params.minPrice != null) search.set("minPrice", String(params.minPrice));
+  if (params.maxPrice != null) search.set("maxPrice", String(params.maxPrice));
   if (page > 1) search.set("page", String(page));
   const query = search.toString();
   return query ? `/productos?${query}` : "/productos";
@@ -140,6 +160,61 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
                 : "Accesorios importados con filtros por categoria, publico y coleccion."
             }
           />
+
+          <form
+            method="GET"
+            className="flex flex-wrap items-end gap-3 rounded-lg border border-zinc-200 bg-white p-3"
+          >
+            {params.category ? (
+              <input type="hidden" name="category" value={params.category} />
+            ) : null}
+            {params.collection ? (
+              <input type="hidden" name="collection" value={params.collection} />
+            ) : null}
+            {params.audience ? (
+              <input type="hidden" name="audience" value={params.audience} />
+            ) : null}
+            {params.q ? <input type="hidden" name="q" value={params.q} /> : null}
+            <label className="text-xs font-semibold text-zinc-600">
+              Ordenar
+              <select
+                name="sort"
+                defaultValue={params.sort ?? "newest"}
+                className="mt-1 block h-9 rounded-md border border-zinc-300 px-2 text-sm text-zinc-950"
+              >
+                <option value="newest">Mas recientes</option>
+                <option value="price_asc">Precio: menor a mayor</option>
+                <option value="price_desc">Precio: mayor a menor</option>
+              </select>
+            </label>
+            <label className="text-xs font-semibold text-zinc-600">
+              Precio min
+              <input
+                type="number"
+                name="minPrice"
+                min="0"
+                defaultValue={params.minPrice ?? ""}
+                className="mt-1 block h-9 w-24 rounded-md border border-zinc-300 px-2 text-sm text-zinc-950"
+              />
+            </label>
+            <label className="text-xs font-semibold text-zinc-600">
+              Precio max
+              <input
+                type="number"
+                name="maxPrice"
+                min="0"
+                defaultValue={params.maxPrice ?? ""}
+                className="mt-1 block h-9 w-24 rounded-md border border-zinc-300 px-2 text-sm text-zinc-950"
+              />
+            </label>
+            <button
+              type="submit"
+              className="h-9 rounded-md bg-zinc-950 px-4 text-sm font-bold text-white"
+            >
+              Aplicar
+            </button>
+          </form>
+
           <ProductGrid
             products={products}
             emptyTitle="No hay productos"
