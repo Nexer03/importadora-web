@@ -9,6 +9,7 @@ import {
   CartError,
   removeCartCoupon,
   removeCartItem,
+  reorderToCart,
   updateCartItem,
 } from "@/services/cart.service";
 import { CouponError } from "@/services/coupon.service";
@@ -79,6 +80,15 @@ export async function applyCouponAction(
     }
     return { ok: false, error: "No se pudo aplicar el cupon." };
   }
+}
+
+export async function reorderAction(formData: FormData): Promise<void> {
+  const orderNumber = String(formData.get("orderNumber") ?? "");
+  if (orderNumber) {
+    await reorderToCart(orderNumber);
+    revalidateCart();
+  }
+  redirect("/carrito");
 }
 
 export async function removeCouponAction(): Promise<void> {

@@ -189,6 +189,7 @@ export const legalDocs = {
 export type LegalSlug = keyof typeof legalDocs;
 
 export const legalNavLinks: Array<{ href: string; label: string }> = [
+  { href: "/seguimiento", label: "Seguir mi pedido" },
   { href: "/envios", label: "Politica de envios" },
   { href: "/cambios", label: "Politica de cambios" },
   { href: "/terminos", label: "Terminos y condiciones" },

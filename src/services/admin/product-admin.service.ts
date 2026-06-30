@@ -1,6 +1,7 @@
 import { ProductStatus } from "@prisma/client";
 
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import type {
   DefaultProductVariantInput,
   ProductImageInput,
@@ -29,8 +30,9 @@ import {
   createProductWithVariant,
   deleteProductImage,
   deleteProductVariant,
+  ADMIN_PRODUCTS_PAGE_SIZE,
   getAdminProductById,
-  getAdminProducts,
+  getAdminProductsPage,
   getAdminProductStatusCounts,
   getLatestAdminProducts,
   setPrimaryProductImage,
@@ -243,10 +245,19 @@ function mapImageData(data: ProductImageInput) {
   };
 }
 
-export async function getAdminProductsList() {
+export async function getAdminProductsList(
+  params: { q?: string; page?: number } = {}
+) {
   await requireAdminAccess();
-  const products = await getAdminProducts();
-  return products.map(mapProduct);
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const [products, total] = await getAdminProductsPage({ q: params.q, page });
+  return {
+    products: products.map(mapProduct),
+    total,
+    page,
+    pageSize: ADMIN_PRODUCTS_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / ADMIN_PRODUCTS_PAGE_SIZE)),
+  };
 }
 
 export async function getAdminProductDetail(id: string) {
@@ -309,7 +320,7 @@ export async function createAdminProduct(
   rawProduct: unknown,
   rawDefaultVariant: unknown
 ) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = validateAdminInput(productInputSchema, rawProduct);
   const variant = validateAdminInput(
     defaultProductVariantInputSchema,
@@ -321,19 +332,35 @@ export async function createAdminProduct(
     mapDefaultVariantData(variant)
   );
 
+  await logAdminAction(admin.id, "Producto creado", {
+    entity: "product",
+    entityId: created.id,
+    detail: created.name,
+  });
+
   return mapProduct(created);
 }
 
 export async function updateAdminProduct(id: string, rawProduct: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = validateAdminInput(productInputSchema, rawProduct);
   const updated = await updateProduct(id, mapProductData(product));
+  await logAdminAction(admin.id, "Producto actualizado", {
+    entity: "product",
+    entityId: id,
+    detail: `${updated.name} · ${updated.status} · ${updated.basePrice}`,
+  });
   return mapProduct(updated);
 }
 
 export async function archiveAdminProduct(id: string) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const product = await archiveProduct(id);
+  await logAdminAction(admin.id, "Producto archivado", {
+    entity: "product",
+    entityId: id,
+    detail: product.name,
+  });
   return mapProduct(product);
 }
 
@@ -369,6 +396,30 @@ export async function createAdminProductImage(
   const created = await createProductImage(productId, mapImageData(image));
 
   if (image.isPrimary) {
+    await setPrimaryProductImage(productId, created.id);
+  }
+
+  return created;
+}
+
+/**
+ * Crea una imagen de producto a partir de una subida ya convertida a WebP.
+ * La URL es una ruta local controlada por el servidor, no requiere validacion
+ * de URL completa.
+ */
+export async function addUploadedProductImage(
+  productId: string,
+  data: { url: string; altText: string | null; isPrimary: boolean }
+) {
+  await requireAdminAccess();
+  const created = await createProductImage(productId, {
+    url: data.url,
+    altText: data.altText,
+    sortOrder: 0,
+    isPrimary: data.isPrimary,
+  });
+
+  if (data.isPrimary) {
     await setPrimaryProductImage(productId, created.id);
   }
 

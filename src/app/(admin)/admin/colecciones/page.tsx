@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { deleteOrDeactivateCollectionAction } from "@/app/(admin)/admin/actions/collections.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminTable, AdminTd, AdminTh } from "@/components/admin/AdminTable";
@@ -62,9 +63,12 @@ export default async function AdminCollectionsPage({ searchParams }: PageProps) 
                   </Link>
                   <form action={deleteOrDeactivateCollectionAction}>
                     <input type="hidden" name="id" value={collection.id} />
-                    <button type="submit" className="font-bold underline">
+                    <ConfirmSubmitButton
+                      className="font-bold underline"
+                      message="Desactivar esta coleccion?"
+                    >
                       Desactivar
-                    </button>
+                    </ConfirmSubmitButton>
                   </form>
                 </div>
               </AdminTd>

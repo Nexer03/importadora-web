@@ -106,6 +106,8 @@ export type StoreSettingDTO = {
   value: string;
 };
 
+export type ProductSort = "newest" | "price_asc" | "price_desc";
+
 export type ProductListParams = {
   category?: string;
   collection?: string;
@@ -113,6 +115,9 @@ export type ProductListParams = {
   q?: string;
   limit?: number;
   page?: number;
+  sort?: ProductSort;
+  minPrice?: number;
+  maxPrice?: number;
 };
 
 export type ProductsPage = {

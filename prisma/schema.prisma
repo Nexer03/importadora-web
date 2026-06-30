@@ -116,11 +116,51 @@ model User {
   inventoryMovements InventoryMovement[]
   carts              Cart[]
   orders             Order[]
+  addresses          Address[]
+  auditLogs          AuditLog[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model AuditLog {
+  id       String  @id @default(cuid())
+  userId   String?
+  action   String
+  entity   String?
+  entityId String?
+  detail   String? @db.Text
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("admin_audit_logs")
+}
+
+model Address {
+  id         String  @id @default(cuid())
+  userId     String
+  label      String?
+  fullName   String
+  phone      String
+  address    String  @db.Text
+  postalCode String
+  city       String
+  state      String
+  reference  String? @db.Text
+  isDefault  Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("addresses")
 }
 
 model Account {

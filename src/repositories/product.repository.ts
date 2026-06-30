@@ -84,7 +84,26 @@ function buildPublicProductWhere(
     ];
   }
 
+  if (params.minPrice != null || params.maxPrice != null) {
+    where.basePrice = {
+      ...(params.minPrice != null ? { gte: params.minPrice } : {}),
+      ...(params.maxPrice != null ? { lte: params.maxPrice } : {}),
+    };
+  }
+
   return where;
+}
+
+function buildOrderBy(
+  sort?: ProductListParams["sort"]
+): Prisma.ProductOrderByWithRelationInput[] {
+  if (sort === "price_asc") {
+    return [{ basePrice: "asc" }];
+  }
+  if (sort === "price_desc") {
+    return [{ basePrice: "desc" }];
+  }
+  return [{ publishedAt: "desc" }, { createdAt: "desc" }];
 }
 
 export function getPublicProducts(params: ProductListParams = {}) {
@@ -106,7 +125,7 @@ export function getPublicProductsPage(params: ProductListParams = {}) {
     prisma.product.findMany({
       where,
       include: publicProductInclude,
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      orderBy: buildOrderBy(params.sort),
       skip: (page - 1) * PUBLIC_PAGE_SIZE,
       take: PUBLIC_PAGE_SIZE,
     }),

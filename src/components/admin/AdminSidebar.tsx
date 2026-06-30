@@ -4,12 +4,14 @@ const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/inventario", label: "Inventario" },
   { href: "/admin/categorias", label: "Categorias" },
   { href: "/admin/publicos", label: "Publicos" },
   { href: "/admin/colecciones", label: "Colecciones" },
   { href: "/admin/promociones", label: "Cupones" },
   { href: "/admin/descuentos", label: "Descuentos" },
   { href: "/admin/home", label: "Home" },
+  { href: "/admin/auditoria", label: "Auditoria" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

@@ -229,3 +229,38 @@ export async function getOrderDetail(
   const order = await getOrderByNumber(orderNumber);
   return order ? toOrderDTO(order) : null;
 }
+
+export type OrderTrackingDTO = {
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+  createdAt: string;
+};
+
+/**
+ * Consulta publica de seguimiento: requiere numero de pedido y el correo con
+ * que se hizo (para no exponer pedidos a cualquiera con el numero).
+ */
+export async function getOrderTracking(
+  orderNumber: string,
+  email: string
+): Promise<OrderTrackingDTO | null> {
+  const order = await getOrderByNumber(orderNumber.trim());
+  if (!order) {
+    return null;
+  }
+  if (order.customerEmail.toLowerCase() !== email.trim().toLowerCase()) {
+    return null;
+  }
+
+  return {
+    orderNumber: order.orderNumber,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    carrier: order.carrier,
+    trackingNumber: order.trackingNumber,
+    createdAt: order.createdAt.toISOString(),
+  };
+}

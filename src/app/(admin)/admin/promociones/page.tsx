@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { deactivateCouponAction } from "@/app/(admin)/admin/actions/coupons.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminTable, AdminTd, AdminTh } from "@/components/admin/AdminTable";
@@ -87,9 +88,12 @@ export default async function AdminCouponsPage({ searchParams }: PageProps) {
                     {coupon.isActive ? (
                       <form action={deactivateCouponAction}>
                         <input type="hidden" name="id" value={coupon.id} />
-                        <button type="submit" className="font-bold underline">
+                        <ConfirmSubmitButton
+                          className="font-bold underline"
+                          message="Desactivar este cupon?"
+                        >
                           Desactivar
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     ) : null}
                   </div>

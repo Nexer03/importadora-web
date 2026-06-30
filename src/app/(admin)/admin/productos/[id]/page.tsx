@@ -14,9 +14,11 @@ import {
   updateProductAction,
   updateProductImageAction,
   updateProductVariantAction,
+  uploadProductImageAction,
 } from "@/app/(admin)/admin/actions/products.actions";
 import { AdminBadge } from "@/components/admin/AdminBadge";
 import { AdminCard } from "@/components/admin/AdminCard";
+import { ConfirmSubmitButton } from "@/components/admin/ConfirmSubmitButton";
 import {
   AdminCheckbox,
   AdminField,
@@ -85,12 +87,12 @@ export default async function ProductEditPage({
           />
           <form action={archiveProductAction} className="mt-4">
             <input type="hidden" name="id" value={product.id} />
-            <button
-              type="submit"
+            <ConfirmSubmitButton
               className="inline-flex h-10 items-center rounded-md border border-zinc-300 px-4 text-sm font-bold text-zinc-950"
+              message="Archivar este producto? Dejara de mostrarse en la tienda."
             >
               Archivar producto
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </AdminCard>
 
@@ -226,7 +228,34 @@ export default async function ProductEditPage({
           </form>
         </AdminCard>
 
-        <AdminCard title="Imagenes por URL">
+        <AdminCard title="Imagenes">
+          <form
+            action={uploadProductImageAction}
+            className="mb-6 space-y-3 rounded-lg border border-dashed border-zinc-300 p-4"
+          >
+            <input type="hidden" name="productId" value={product.id} />
+            <h3 className="text-sm font-black uppercase tracking-wide text-zinc-950">
+              Subir imagen
+            </h3>
+            <p className="text-xs text-zinc-500">
+              Se convierte automaticamente a WebP optimizado.
+            </p>
+            <input
+              type="file"
+              name="file"
+              accept="image/*"
+              required
+              className="block w-full text-sm text-zinc-700 file:mr-3 file:rounded-md file:border-0 file:bg-zinc-950 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
+            />
+            <AdminFormGrid>
+              <AdminField label="Alt">
+                <AdminInput name="altText" />
+              </AdminField>
+              <AdminCheckbox name="isPrimary" label="Primaria" />
+            </AdminFormGrid>
+            <AdminSubmitButton>Subir y convertir a WebP</AdminSubmitButton>
+          </form>
+
           <div className="grid gap-4 lg:grid-cols-2">
             {product.images.map((image) => (
               <div key={image.id} className="rounded-lg border border-zinc-200 p-4">
@@ -289,7 +318,7 @@ export default async function ProductEditPage({
           <form action={createProductImageAction} className="mt-6 space-y-4">
             <input type="hidden" name="productId" value={product.id} />
             <h3 className="text-sm font-black uppercase tracking-wide text-zinc-950">
-              Agregar imagen
+              Agregar por URL
             </h3>
             <AdminFormGrid>
               <AdminField label="URL" full>

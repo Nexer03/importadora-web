@@ -3,6 +3,8 @@ import Link from "next/link";
 import { AdminBadge } from "@/components/admin/AdminBadge";
 import { AdminNotice } from "@/components/admin/AdminNotice";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
+import { AdminPagination } from "@/components/admin/AdminPagination";
+import { AdminSearch } from "@/components/admin/AdminSearch";
 import { AdminTable, AdminTd, AdminTh } from "@/components/admin/AdminTable";
 import { getAdminOrdersList } from "@/services/admin/order-admin.service";
 import { formatMXN } from "@/utils/format";
@@ -18,7 +20,12 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 type PageProps = {
-  searchParams: Promise<{ error?: string; saved?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    saved?: string;
+    q?: string;
+    page?: string;
+  }>;
 };
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", {
@@ -27,10 +34,19 @@ const dateFormatter = new Intl.DateTimeFormat("es-MX", {
 });
 
 export default async function AdminOrdersPage({ searchParams }: PageProps) {
-  const [params, orders] = await Promise.all([
-    searchParams,
-    getAdminOrdersList(),
-  ]);
+  const params = await searchParams;
+  const q = params.q?.trim();
+  const pageNum = Math.max(1, Math.trunc(Number(params.page) || 1));
+  const data = await getAdminOrdersList({ q, page: pageNum });
+  const orders = data.orders;
+
+  function makeHref(page: number) {
+    const search = new URLSearchParams();
+    if (q) search.set("q", q);
+    if (page > 1) search.set("page", String(page));
+    const query = search.toString();
+    return query ? `/admin/pedidos?${query}` : "/admin/pedidos";
+  }
 
   return (
     <>
@@ -39,10 +55,15 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
         description="Pedidos recibidos, su estado de pago y de entrega."
       />
       <AdminNotice error={params.error} saved={params.saved} />
+      <AdminSearch
+        action="/admin/pedidos"
+        placeholder="Buscar por numero, correo o nombre…"
+        defaultValue={q}
+      />
 
       {orders.length === 0 ? (
         <div className="rounded-lg border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-600">
-          Aun no hay pedidos.
+          {q ? "No hay pedidos que coincidan con la busqueda." : "Aun no hay pedidos."}
         </div>
       ) : (
         <AdminTable>
@@ -99,6 +120,12 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           </tbody>
         </AdminTable>
       )}
+
+      <AdminPagination
+        page={data.page}
+        totalPages={data.totalPages}
+        makeHref={makeHref}
+      />
     </>
   );
 }

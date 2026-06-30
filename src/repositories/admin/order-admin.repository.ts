@@ -11,15 +11,44 @@ export type AdminOrderWithRelations = Prisma.OrderGetPayload<{
   include: typeof adminOrderDetailInclude;
 }>;
 
-export function getAdminOrders() {
+export const ADMIN_ORDERS_PAGE_SIZE = 20;
+
+export function getRecentOrders(limit = 5) {
   return prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { items: { select: { quantity: true } } },
-    take: 100,
+    take: limit,
   });
 }
 
-export type AdminOrderListRow = Awaited<ReturnType<typeof getAdminOrders>>[number];
+export function getAdminOrdersPage(params: { q?: string; page?: number } = {}) {
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const q = params.q?.trim();
+  const where: Prisma.OrderWhereInput = q
+    ? {
+        OR: [
+          { orderNumber: { contains: q } },
+          { customerEmail: { contains: q } },
+          { customerName: { contains: q } },
+        ],
+      }
+    : {};
+
+  return Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { items: { select: { quantity: true } } },
+      skip: (page - 1) * ADMIN_ORDERS_PAGE_SIZE,
+      take: ADMIN_ORDERS_PAGE_SIZE,
+    }),
+    prisma.order.count({ where }),
+  ]);
+}
+
+export type AdminOrderListRow = Awaited<
+  ReturnType<typeof getRecentOrders>
+>[number];
 
 export function getAdminOrderById(id: string) {
   return prisma.order.findUnique({

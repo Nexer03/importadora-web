@@ -1,9 +1,11 @@
 import { OrderStatus } from "@prisma/client";
 
 import {
+  ADMIN_ORDERS_PAGE_SIZE,
   getAdminOrderById,
-  getAdminOrders,
+  getAdminOrdersPage,
   getOrderMetrics,
+  getRecentOrders,
   updateOrderNotes,
   updateOrderShipping,
   updateOrderStatus,
@@ -11,6 +13,7 @@ import {
   type AdminOrderWithRelations,
 } from "@/repositories/admin/order-admin.repository";
 import { requireAdminAccess } from "@/services/admin.guard";
+import { logAdminAction } from "@/services/admin/audit-admin.service";
 import {
   updateOrderNotesSchema,
   updateOrderShippingSchema,
@@ -166,21 +169,28 @@ function mapDetail(order: AdminOrderWithRelations): AdminOrderDetailDTO {
   };
 }
 
-export async function getAdminOrdersList() {
+export async function getAdminOrdersList(params: { q?: string; page?: number } = {}) {
   await requireAdminAccess();
-  const orders = await getAdminOrders();
-  return orders.map(mapListItem);
+  const page = Math.max(1, Math.trunc(params.page ?? 1));
+  const [orders, total] = await getAdminOrdersPage({ q: params.q, page });
+  return {
+    orders: orders.map(mapListItem),
+    total,
+    page,
+    pageSize: ADMIN_ORDERS_PAGE_SIZE,
+    totalPages: Math.max(1, Math.ceil(total / ADMIN_ORDERS_PAGE_SIZE)),
+  };
 }
 
 export async function getAdminOrderDashboard() {
   await requireAdminAccess();
   const [metrics, orders] = await Promise.all([
     getOrderMetrics(),
-    getAdminOrders(),
+    getRecentOrders(5),
   ]);
   return {
     metrics,
-    recentOrders: orders.slice(0, 5).map(mapListItem),
+    recentOrders: orders.map(mapListItem),
   };
 }
 
@@ -191,9 +201,15 @@ export async function getAdminOrderDetail(id: string) {
 }
 
 export async function updateAdminOrderStatus(id: string, raw: unknown) {
-  await requireAdminAccess();
+  const admin = await requireAdminAccess();
   const { status } = validateAdminInput(updateOrderStatusSchema, raw);
-  return updateOrderStatus(id, status as OrderStatus);
+  const result = await updateOrderStatus(id, status as OrderStatus);
+  await logAdminAction(admin.id, "Cambio de estado de pedido", {
+    entity: "order",
+    entityId: id,
+    detail: `Estado: ${status}`,
+  });
+  return result;
 }
 
 export async function updateAdminOrderShipping(id: string, raw: unknown) {
