@@ -83,10 +83,7 @@ export async function createProductAction(formData: FormData) {
 
   try {
     const product = await createAdminProduct(productDataFromForm(formData), {
-      sku: formData.get("defaultSku"),
-      name: formData.get("defaultVariantName"),
-      stockTotal: formData.get("defaultStockTotal"),
-      stockAvailable: formData.get("defaultStockAvailable"),
+      stock: formData.get("defaultStock"),
     });
 
     revalidateProductPaths(product);

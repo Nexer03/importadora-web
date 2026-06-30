@@ -27,6 +27,14 @@ type AdminProductFormProps = {
 
 const statuses = ["DRAFT", "PUBLISHED", "HIDDEN", "OUT_OF_STOCK", "ARCHIVED"];
 
+const statusLabels: Record<string, string> = {
+  DRAFT: "Borrador",
+  PUBLISHED: "Publicado",
+  HIDDEN: "Oculto",
+  OUT_OF_STOCK: "Agotado",
+  ARCHIVED: "Archivado",
+};
+
 export function AdminProductForm({
   action,
   product,
@@ -48,12 +56,14 @@ export function AdminProductForm({
             placeholder="Bolso urbano"
           />
         </AdminField>
-        <AdminField label="Slug">
+        <AdminField
+          label="Slug (opcional)"
+          hint="Es la parte de la URL del producto. Si lo dejas vacio se genera del nombre."
+        >
           <AdminInput
             name="slug"
             defaultValue={product?.slug}
-            required
-            placeholder="bolso-urbano"
+            placeholder="Se genera del nombre"
           />
         </AdminField>
         <AdminField label="Categoria">
@@ -88,7 +98,10 @@ export function AdminProductForm({
             required
           />
         </AdminField>
-        <AdminField label="Precio descuento">
+        <AdminField
+          label="Precio con descuento (opcional)"
+          hint="Si el producto esta en oferta, pon aqui el precio rebajado. Debe ser menor al precio base."
+        >
           <AdminInput
             type="number"
             step="0.01"
@@ -97,26 +110,30 @@ export function AdminProductForm({
             defaultValue={product?.discountPrice ?? ""}
           />
         </AdminField>
-        <AdminField label="Status">
+        <AdminField
+          label="Status"
+          hint="PUBLISHED = visible en la tienda. DRAFT = borrador (no se muestra)."
+        >
           <AdminSelect name="status" defaultValue={product?.status ?? "DRAFT"} required>
             {statuses.map((status) => (
               <option key={status} value={status}>
-                {status}
+                {statusLabels[status] ?? status}
               </option>
             ))}
           </AdminSelect>
         </AdminField>
-        <div className="grid gap-3 sm:grid-cols-3 sm:col-span-2">
+        <div className="grid gap-3 sm:col-span-2 sm:grid-cols-2">
           <AdminCheckbox
             name="isFeatured"
             label="Destacado"
+            hint="Aparece en la seccion de destacados del inicio."
             defaultChecked={product?.isFeatured}
           />
-          <AdminCheckbox name="isNew" label="Nuevo" defaultChecked={product?.isNew} />
           <AdminCheckbox
-            name="indexable"
-            label="Indexable"
-            defaultChecked={product?.indexable ?? true}
+            name="isNew"
+            label="Nuevo"
+            hint="Marca el producto con la etiqueta 'Nuevo' y lo muestra en Novedades."
+            defaultChecked={product?.isNew}
           />
         </div>
         <AdminField label="Descripcion corta" full>
@@ -133,30 +150,21 @@ export function AdminProductForm({
       {includeDefaultVariant ? (
         <div className="rounded-lg border border-zinc-200 p-4">
           <h2 className="text-sm font-black uppercase tracking-wide text-zinc-950">
-            Variante default
+            Inventario
           </h2>
+          <p className="mt-1 text-xs text-zinc-500">
+            Se crea una variante interna automaticamente. Despues puedes agregar
+            colores o tallas desde la edicion del producto.
+          </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <AdminField label="SKU">
-              <AdminInput name="defaultSku" required placeholder="SKU-001" />
-            </AdminField>
-            <AdminField label="Nombre variante">
-              <AdminInput name="defaultVariantName" required defaultValue="Default" />
-            </AdminField>
-            <AdminField label="Stock total">
+            <AdminField
+              label="Stock inicial"
+              hint="Cuantas piezas tienes disponibles. Puedes ajustarlo despues."
+            >
               <AdminInput
                 type="number"
-                name="defaultStockTotal"
+                name="defaultStock"
                 min="0"
-                required
-                defaultValue={0}
-              />
-            </AdminField>
-            <AdminField label="Stock disponible">
-              <AdminInput
-                type="number"
-                name="defaultStockAvailable"
-                min="0"
-                required
                 defaultValue={0}
               />
             </AdminField>
@@ -164,11 +172,23 @@ export function AdminProductForm({
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-zinc-200 p-4">
-        <h2 className="text-sm font-black uppercase tracking-wide text-zinc-950">
-          SEO
-        </h2>
+      <details className="rounded-lg border border-zinc-200 p-4">
+        <summary className="cursor-pointer text-sm font-black uppercase tracking-wide text-zinc-950">
+          SEO y avanzado (opcional)
+        </summary>
+        <p className="mt-2 text-xs text-zinc-500">
+          Solo si quieres personalizar como se ve en Google y redes. Si lo dejas
+          vacio se genera automaticamente del nombre y la descripcion.
+        </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <AdminCheckbox
+              name="indexable"
+              label="Mostrar en buscadores (Google)"
+              hint="Si lo desactivas, el producto no aparece en Google ni en el sitemap."
+              defaultChecked={product?.indexable ?? true}
+            />
+          </div>
           <AdminField label="SEO title">
             <AdminInput name="seoTitle" defaultValue={product?.seoTitle ?? ""} />
           </AdminField>
@@ -197,7 +217,7 @@ export function AdminProductForm({
             />
           </AdminField>
         </div>
-      </div>
+      </details>
 
       <AdminSubmitButton>{submitLabel}</AdminSubmitButton>
     </form>

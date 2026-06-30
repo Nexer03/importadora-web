@@ -22,7 +22,7 @@ export const productStatusSchema = z.enum([
 export const productInputSchema = z
   .object({
     name: requiredStringSchema,
-    slug: requiredStringSchema,
+    slug: optionalTextSchema,
     shortDescription: optionalTextSchema,
     description: optionalTextSchema,
     basePrice: positiveNumberSchema,
@@ -68,6 +68,18 @@ export const defaultProductVariantInputSchema = productVariantInputSchema.pick({
   name: true,
   stockTotal: true,
   stockAvailable: true,
+});
+
+/**
+ * Variante por defecto simplificada para crear un producto: solo el stock
+ * inicial. El SKU y el nombre ("Default") se generan automaticamente.
+ */
+export const defaultVariantInputSchema = z.object({
+  stock: z.preprocess(
+    (value) =>
+      value === "" || value === undefined || value === null ? 0 : value,
+    z.coerce.number().int().min(0, "El stock debe ser mayor o igual a 0")
+  ),
 });
 
 export const productImageInputSchema = z.object({

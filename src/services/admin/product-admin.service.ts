@@ -1,15 +1,16 @@
+import { randomBytes } from "node:crypto";
+
 import { ProductStatus } from "@prisma/client";
 
 import { requireAdminAccess } from "@/services/admin.guard";
 import { logAdminAction } from "@/services/admin/audit-admin.service";
 import type {
-  DefaultProductVariantInput,
   ProductImageInput,
   ProductInput,
   ProductVariantInput,
 } from "@/validators/admin/product.validator";
 import {
-  defaultProductVariantInputSchema,
+  defaultVariantInputSchema,
   productImageInputSchema,
   productInputSchema,
   productVariantInputSchema,
@@ -183,10 +184,12 @@ function mapProduct(product: AdminProductWithRelations): AdminProductDTO {
 
 function mapProductData(data: ProductInput) {
   const status = data.status as ProductStatus;
+  // Si el slug viene vacio se genera a partir del nombre.
+  const slug = normalizeSlug(data.slug ? data.slug : data.name);
 
   return {
     name: data.name,
-    slug: normalizeSlug(data.slug),
+    slug,
     shortDescription: data.shortDescription,
     description: data.description,
     basePrice: data.basePrice,
@@ -219,20 +222,6 @@ function mapVariantData(data: ProductVariantInput) {
     stockAvailable: data.stockAvailable,
     stockReserved: data.stockReserved,
     isActive: data.isActive,
-  };
-}
-
-function mapDefaultVariantData(data: DefaultProductVariantInput) {
-  return {
-    sku: data.sku,
-    name: data.name,
-    color: null,
-    size: null,
-    priceOverride: null,
-    stockTotal: data.stockTotal,
-    stockAvailable: data.stockAvailable,
-    stockReserved: 0,
-    isActive: true,
   };
 }
 
@@ -322,15 +311,28 @@ export async function createAdminProduct(
 ) {
   const admin = await requireAdminAccess();
   const product = validateAdminInput(productInputSchema, rawProduct);
-  const variant = validateAdminInput(
-    defaultProductVariantInputSchema,
+  const { stock } = validateAdminInput(
+    defaultVariantInputSchema,
     rawDefaultVariant
   );
 
-  const created = await createProductWithVariant(
-    mapProductData(product),
-    mapDefaultVariantData(variant)
-  );
+  const productData = mapProductData(product);
+  // SKU automatico a partir del slug + sufijo aleatorio para que sea unico.
+  const sku = `${productData.slug.toUpperCase().slice(0, 30)}-${randomBytes(2)
+    .toString("hex")
+    .toUpperCase()}`;
+
+  const created = await createProductWithVariant(productData, {
+    sku,
+    name: "Default",
+    color: null,
+    size: null,
+    priceOverride: null,
+    stockTotal: stock,
+    stockAvailable: stock,
+    stockReserved: 0,
+    isActive: true,
+  });
 
   await logAdminAction(admin.id, "Producto creado", {
     entity: "product",
