@@ -3,7 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { saveProductImageWebp } from "@/lib/uploads";
 import {
+  addUploadedProductImage,
   archiveAdminProduct,
   createAdminProduct,
   createAdminProductImage,
@@ -168,6 +170,43 @@ export async function deleteProductVariantAction(formData: FormData) {
     await deleteAdminProductVariant(id);
     revalidatePath(target);
     revalidatePath("/productos");
+    target = `${target}?saved=1`;
+  } catch (error) {
+    target = errorRedirectPath(target, error);
+  }
+
+  redirect(target);
+}
+
+export async function uploadProductImageAction(formData: FormData) {
+  const productId = getRequiredFormValue(formData, "productId");
+  let target = `/admin/productos/${productId}`;
+
+  try {
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size === 0) {
+      throw new Error("Selecciona una imagen.");
+    }
+    if (!file.type.startsWith("image/")) {
+      throw new Error("El archivo debe ser una imagen.");
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("La imagen no debe superar 8 MB.");
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const url = await saveProductImageWebp(buffer);
+    const altTextRaw = formData.get("altText");
+    const altText =
+      typeof altTextRaw === "string" && altTextRaw.trim()
+        ? altTextRaw.trim()
+        : null;
+    const isPrimary = formData.get("isPrimary") === "on";
+
+    await addUploadedProductImage(productId, { url, altText, isPrimary });
+    revalidatePath(target);
+    revalidatePath("/productos");
+    revalidatePath("/");
     target = `${target}?saved=1`;
   } catch (error) {
     target = errorRedirectPath(target, error);

@@ -402,6 +402,30 @@ export async function createAdminProductImage(
   return created;
 }
 
+/**
+ * Crea una imagen de producto a partir de una subida ya convertida a WebP.
+ * La URL es una ruta local controlada por el servidor, no requiere validacion
+ * de URL completa.
+ */
+export async function addUploadedProductImage(
+  productId: string,
+  data: { url: string; altText: string | null; isPrimary: boolean }
+) {
+  await requireAdminAccess();
+  const created = await createProductImage(productId, {
+    url: data.url,
+    altText: data.altText,
+    sortOrder: 0,
+    isPrimary: data.isPrimary,
+  });
+
+  if (data.isPrimary) {
+    await setPrimaryProductImage(productId, created.id);
+  }
+
+  return created;
+}
+
 export async function updateAdminProductImage(id: string, rawImage: unknown) {
   await requireAdminAccess();
   const image = validateAdminInput(productImageInputSchema, rawImage);
