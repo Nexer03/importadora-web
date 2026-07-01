@@ -155,7 +155,7 @@ export async function createOrderFromCart(
       orderNumber,
       amount: total,
       currency: getStoreCurrency(),
-      description: `Pedido ${orderNumber} - Importadora`,
+      description: `Pedido ${orderNumber} - Allure Selection`,
       returnUrl: `${appUrl}/api/payments/${provider.name}/capture?order=${orderNumber}`,
       cancelUrl: `${appUrl}/api/payments/${provider.name}/cancel?order=${orderNumber}`,
     });

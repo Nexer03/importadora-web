@@ -153,7 +153,7 @@ async function main() {
   const settings = [
     {
       key: "store_name",
-      value: "Importadora",
+      value: "Allure Selection",
     },
     {
       key: "national_shipping_cost",
@@ -172,7 +172,9 @@ async function main() {
   for (const setting of settings) {
     await prisma.storeSetting.upsert({
       where: { key: setting.key },
-      update: {},
+      // El nombre de la tienda se fuerza a la marca actual (Allure Selection);
+      // el resto de settings no se sobreescriben para no pisar ediciones del admin.
+      update: setting.key === "store_name" ? { value: setting.value } : {},
       create: setting,
     });
   }

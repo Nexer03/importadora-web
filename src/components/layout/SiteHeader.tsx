@@ -29,9 +29,24 @@ export async function SiteHeader() {
         <div className="flex items-center justify-between gap-4">
           <Link
             href="/"
-            className="text-lg font-black uppercase tracking-normal text-zinc-950"
+            aria-label="Allure Selection - Inicio"
+            className="flex items-center gap-2.5"
           >
-            Importadora
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/icono-transparent.png"
+              alt=""
+              aria-hidden="true"
+              className="h-10 w-auto sm:h-11"
+            />
+            <span className="flex flex-col leading-none">
+              <span className="font-serif text-lg font-semibold uppercase tracking-[0.22em] text-zinc-900 sm:text-xl">
+                Allure
+              </span>
+              <span className="mt-1 text-[9px] font-medium uppercase tracking-[0.38em] text-[#b08d3f] sm:text-[10px]">
+                Selection
+              </span>
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             {user ? (

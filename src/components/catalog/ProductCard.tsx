@@ -21,8 +21,8 @@ export function ProductCard({ product }: ProductCardProps) {
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-zinc-100 px-4 text-center">
               <div className="h-16 w-16 rounded-full border border-zinc-300 bg-white" />
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                Importadora
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-400">
+                Allure Selection
               </p>
             </div>
           )}

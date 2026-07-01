@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  title: "Login admin | Importadora",
+  title: "Login admin | Allure Selection",
   robots: {
     index: false,
     follow: false,
@@ -65,10 +65,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-10">
       <section className="w-full max-w-md rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-wide text-zinc-500">
-          Importadora
-        </p>
-        <h1 className="mt-3 text-3xl font-black tracking-normal text-zinc-950">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/brand/logo-transparent.png"
+          alt="Allure Selection"
+          className="mx-auto h-28 w-auto"
+        />
+        <h1 className="mt-5 text-center text-3xl font-black tracking-normal text-zinc-950">
           Iniciar sesion
         </h1>
         <p className="mt-3 text-sm leading-6 text-zinc-600">
