@@ -72,7 +72,8 @@ async function main() {
   for (const category of categories) {
     await prisma.category.upsert({
       where: { slug: category.slug },
-      update: category,
+      // No sobreescribir si ya existe (para no pisar ediciones del admin).
+      update: {},
       create: {
         ...category,
         seoTitle: `${category.name} | Accesorios importados`,
@@ -105,7 +106,7 @@ async function main() {
   for (const audience of audiences) {
     await prisma.audience.upsert({
       where: { slug: audience.slug },
-      update: audience,
+      update: {},
       create: audience,
     });
   }
@@ -140,7 +141,7 @@ async function main() {
   for (const collection of collections) {
     await prisma.collection.upsert({
       where: { slug: collection.slug },
-      update: collection,
+      update: {},
       create: {
         ...collection,
         seoTitle: `${collection.name} | Accesorios importados`,
@@ -171,16 +172,10 @@ async function main() {
   for (const setting of settings) {
     await prisma.storeSetting.upsert({
       where: { key: setting.key },
-      update: { value: setting.value },
+      update: {},
       create: setting,
     });
   }
-
-  await prisma.storeSetting.deleteMany({
-    where: {
-      key: "free_shipping_min_amount",
-    },
-  });
 
   await prisma.homeSection.upsert({
     where: {
