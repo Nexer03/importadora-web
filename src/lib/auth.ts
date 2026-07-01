@@ -89,6 +89,9 @@ export const authConfig = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  // Necesario al auto-hospedar (Hostinger, no Vercel): confia en el host del
+  // request. Sin esto Auth.js lanza UntrustedHost y bloquea /api/auth/*.
+  trustHost: true,
 } satisfies NextAuthConfig;
 
 export const {
