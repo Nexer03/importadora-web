@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import { ContentPage } from "@/components/layout/ContentPage";
 import { legalDocs } from "@/content/legal";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 const doc = legalDocs["preguntas-frecuentes"];
 
 export const metadata: Metadata = {

@@ -10,11 +10,16 @@ import {
 } from "./catalog.service";
 
 export async function getPublicLayoutData() {
-  const settings = await getStoreSettings();
-
-  return {
-    settings: settingsToRecord(settings.map(toStoreSettingDTO)),
-  };
+  try {
+    const settings = await getStoreSettings();
+    return {
+      settings: settingsToRecord(settings.map(toStoreSettingDTO)),
+    };
+  } catch {
+    // Si la BD no esta disponible (p.ej. durante el build en el host), se usan
+    // valores por defecto para no romper el render del layout.
+    return { settings: {} as Record<string, string> };
+  }
 }
 
 export async function getHomePageData(): Promise<HomePageData> {

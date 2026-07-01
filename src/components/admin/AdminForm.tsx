@@ -12,10 +12,12 @@ export function AdminField({
   label,
   children,
   full = false,
+  hint,
 }: {
   label: string;
   children: React.ReactNode;
   full?: boolean;
+  hint?: string;
 }) {
   return (
     <label className={`block ${full ? "sm:col-span-2" : ""}`}>
@@ -23,6 +25,11 @@ export function AdminField({
         {label}
       </span>
       <div className="mt-2">{children}</div>
+      {hint ? (
+        <span className="mt-1 block text-xs font-normal normal-case leading-5 text-zinc-500">
+          {hint}
+        </span>
+      ) : null}
     </label>
   );
 }
@@ -66,20 +73,29 @@ export function AdminCheckbox({
   label,
   name,
   defaultChecked,
+  hint,
 }: {
   label: string;
   name: string;
   defaultChecked?: boolean;
+  hint?: string;
 }) {
   return (
-    <label className="flex items-center gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 text-sm font-semibold text-zinc-700">
+    <label className="flex items-start gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 text-sm font-semibold text-zinc-700">
       <input
         type="checkbox"
         name={name}
         defaultChecked={defaultChecked}
-        className="h-4 w-4 accent-zinc-950"
+        className="mt-0.5 h-4 w-4 accent-zinc-950"
       />
-      {label}
+      <span>
+        {label}
+        {hint ? (
+          <span className="mt-0.5 block text-xs font-normal text-zinc-500">
+            {hint}
+          </span>
+        ) : null}
+      </span>
     </label>
   );
 }
