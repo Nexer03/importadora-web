@@ -16,7 +16,7 @@ export const legalDocs = {
     slug: "terminos",
     title: "Terminos y condiciones",
     description:
-      "Condiciones de uso de la tienda en linea de Importadora: compras, precios, pagos y responsabilidades.",
+      "Condiciones de uso de la tienda en linea de Allure Selection: compras, precios, pagos y responsabilidades.",
     intro:
       "Al usar este sitio y realizar una compra, aceptas los siguientes terminos y condiciones.",
     sections: [
@@ -53,7 +53,7 @@ export const legalDocs = {
     slug: "privacidad",
     title: "Aviso de privacidad",
     description:
-      "Como Importadora recopila, usa y protege tus datos personales.",
+      "Como Allure Selection recopila, usa y protege tus datos personales.",
     intro:
       "Tu privacidad es importante. Este aviso describe que datos recabamos y para que los usamos.",
     sections: [
@@ -140,7 +140,7 @@ export const legalDocs = {
   contacto: {
     slug: "contacto",
     title: "Contacto",
-    description: "Como comunicarte con Importadora.",
+    description: "Como comunicarte con Allure Selection.",
     intro:
       "Estamos para ayudarte con tus pedidos, cambios y dudas generales.",
     sections: [

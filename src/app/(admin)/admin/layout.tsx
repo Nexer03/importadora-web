@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export const metadata: Metadata = {
-  title: "Admin | Importadora",
+  title: "Admin | Allure Selection",
   robots: {
     index: false,
     follow: false,

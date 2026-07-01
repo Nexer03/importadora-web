@@ -68,7 +68,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     description:
       product.description ??
       product.shortDescription ??
-      `${product.name} en Importadora`,
+      `${product.name} en Allure Selection`,
     image: product.images.map((image) => image.url),
     sku: product.sku ?? product.slug,
     offers: {

@@ -6,7 +6,8 @@ import type {
   PublicProductDetail,
 } from "@/types/catalog";
 
-const DEFAULT_TITLE = "Importadora | Accesorios importados";
+const DEFAULT_TITLE = "Allure Selection | Accesorios importados";
+const OG_IMAGE = "/brand/og-image.png";
 const DEFAULT_DESCRIPTION =
   "Accesorios importados para dama, caballero y estilo unisex con envio nacional y entrega local.";
 
@@ -35,7 +36,7 @@ export function buildDefaultMetadata(): Metadata {
     metadataBase: new URL(siteUrl),
     title: {
       default: DEFAULT_TITLE,
-      template: "%s | Importadora",
+      template: "%s | Allure Selection",
     },
     description: DEFAULT_DESCRIPTION,
     alternates: {
@@ -45,9 +46,10 @@ export function buildDefaultMetadata(): Metadata {
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
       url: siteUrl,
-      siteName: "Importadora",
+      siteName: "Allure Selection",
       locale: "es_MX",
       type: "website",
+      images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Allure Selection" }],
     },
     robots: buildRobots(true),
   };

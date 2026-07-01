@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Acceso denegado | Importadora",
+  title: "Acceso denegado | Allure Selection",
   robots: {
     index: false,
     follow: false,

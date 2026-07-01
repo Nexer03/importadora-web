@@ -102,7 +102,7 @@ export async function createPayPalOrder(params: {
         },
       ],
       application_context: {
-        brand_name: "Importadora",
+        brand_name: "Allure Selection",
         locale: "es-MX",
         user_action: "PAY_NOW",
         shipping_preference: "NO_SHIPPING",

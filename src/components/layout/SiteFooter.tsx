@@ -7,15 +7,24 @@ type SiteFooterProps = {
 };
 
 export function SiteFooter({ settings = {} }: SiteFooterProps) {
-  const storeName = settings.store_name ?? "Importadora";
+  const storeName = settings.store_name ?? "Allure Selection";
 
   return (
     <footer className="mt-auto border-t border-zinc-200 bg-zinc-950 text-white">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div className="sm:col-span-2">
-          <p className="text-lg font-black uppercase tracking-normal">
-            {storeName}
-          </p>
+          <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/icono-transparent.png"
+              alt=""
+              aria-hidden="true"
+              className="h-10 w-auto"
+            />
+            <p className="font-serif text-lg font-semibold uppercase tracking-[0.2em]">
+              {storeName}
+            </p>
+          </div>
           <p className="mt-4 max-w-md text-sm leading-6 text-zinc-300">
             Accesorios importados con catalogo variable, entrega local y envio
             nacional.

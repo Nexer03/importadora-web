@@ -47,7 +47,7 @@ export default async function HomePage() {
   ];
 
   const siteUrl = getSiteUrl().replace(/\/$/, "");
-  const storeName = data.settings.store_name ?? "Importadora";
+  const storeName = data.settings.store_name ?? "Allure Selection";
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
